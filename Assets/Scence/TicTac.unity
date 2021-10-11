@@ -243,7 +243,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   X: 0
-  Y: 0
+  Y: 2
+  hasChar: 0
 --- !u!61 &258190194
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -389,8 +390,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 920c43aa779155a47864c3d1d1c1208e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  X: 0
-  Y: 0
+  X: 1
+  Y: 1
+  hasChar: 0
 --- !u!61 &355264523
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -536,8 +538,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 920c43aa779155a47864c3d1d1c1208e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  X: 0
+  X: 2
   Y: 0
+  hasChar: 0
 --- !u!61 &697961507
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -685,6 +688,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   X: 0
   Y: 0
+  hasChar: 0
 --- !u!61 &1130816027
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -830,8 +834,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 920c43aa779155a47864c3d1d1c1208e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  X: 0
+  X: 1
   Y: 0
+  hasChar: 0
 --- !u!61 &1149387184
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -977,8 +982,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 920c43aa779155a47864c3d1d1c1208e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  X: 0
-  Y: 0
+  X: 2
+  Y: 2
+  hasChar: 0
 --- !u!61 &1558239684
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1124,8 +1130,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 920c43aa779155a47864c3d1d1c1208e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  X: 0
-  Y: 0
+  X: 1
+  Y: 2
+  hasChar: 0
 --- !u!61 &1587321307
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1207,6 +1214,7 @@ MonoBehaviour:
   playerTurn: 0
   x_Obj: {fileID: 3735411568791194034, guid: a1dd4fde571ff0946bc3b01438b23724, type: 3}
   y_Obj: {fileID: 1852996641406354620, guid: 91d16132e6b5ad94b9443134bda9b783, type: 3}
+  arr: 000000000000000000000000000000000000000000000000000000000000000000000000
 --- !u!1 &1815048494
 GameObject:
   m_ObjectHideFlags: 0
@@ -1327,7 +1335,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   X: 0
-  Y: 0
+  Y: 1
+  hasChar: 0
 --- !u!61 &1815048499
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1473,8 +1482,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 920c43aa779155a47864c3d1d1c1208e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  X: 0
-  Y: 0
+  X: 2
+  Y: 1
+  hasChar: 0
 --- !u!61 &1997067874
 BoxCollider2D:
   m_ObjectHideFlags: 0
