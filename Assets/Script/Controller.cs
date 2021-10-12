@@ -26,11 +26,11 @@ namespace Assets.Script
 
         public GameObject y_Obj;
 
-        public char[,] arrBoard = new char[4, 4];
+        public char[,] arrBoard = new char[3, 3];
 
-        public PieceBoard[,] arrPiece = new PieceBoard[4, 4];
+        public PieceBoard[,] arrPiece = new PieceBoard[3, 3];
 
-
+        public enum DirectionPoint { TopLeft, TopRight, BotLeft, BotRight, MiddleRow,MiddleColumn,Central,None }
         private void Start()
         {
             playerTurn = true;
@@ -228,37 +228,111 @@ namespace Assets.Script
 
         }
 
-        private char CheckCurrentPoint(Vector2 dir, PieceBoard start)
+        private DirectionPoint CheckCurrentPoint(PieceBoard start)
         {
-            if (dir == Vector2.one)
+            if (start.X < 2 && start.Y < 2)
             {
-                if (arrBoard[start.X, start.Y] == arrBoard[start.X - 1, start.Y - 1] && arrBoard[start.X, start.Y] == arrBoard[start.X + 1, start.Y + 1])
-                {
-                    return arrBoard[start.X, start.Y];
-                }
-                else return emptyChar;
+                return DirectionPoint.BotLeft;
             }
-            else if (dir == -Vector2.one)
+            else if (start.X < 2 && start.Y > 2)
             {
-                if (arrBoard[start.X, start.Y] == arrBoard[start.X + 2, start.Y + 2] && arrBoard[start.X, start.Y] == arrBoard[start.X + 1, start.Y + 1])
-                {
-                    return arrBoard[start.X, start.Y];
-                }
-                else return emptyChar;
+                return DirectionPoint.TopLeft;
             }
-
-            return emptyChar;
+            else if (start.X > 2 && start.Y < 2)
+            {
+                return DirectionPoint.BotRight;
+            }
+            else if (start.X > 2 && start.Y > 2)
+            {
+                return DirectionPoint.TopRight;
+            }
+            else if (start.Y == 2)
+            {
+                if (start.X != 2)
+                    return DirectionPoint.MiddleRow;
+                else return DirectionPoint.Central;
+            }
+            else if (start.X == 2)
+            {
+                if (start.Y != 2)
+                    return DirectionPoint.MiddleColumn;
+                else return DirectionPoint.Central;
+            }
+            else return DirectionPoint.None;
         }
 
-        private Vector2 CheckDirection(int dir1X, int dir1Y, int dir2X, int dir2Y)
+        private int CheckWinV2(DirectionPoint point,PieceBoard piece)
         {
-            int disX = dir2X - dir1X;
-            int disY = dir2X - dir1Y;
-            if (disX == 1 || disY == 1)
+            switch(point)
             {
-                return new Vector2(dir2X - dir1X, dir2Y - dir1Y);
+                case DirectionPoint.BotLeft:
+                    {
+                        int count = 0;
+                        //vertical
+                       for(int y=0;y<5;y++)
+                        {
+                            if (arrBoard[piece.X, piece.Y] == arrBoard[piece.X, y])
+                            {
+                                count++;
+                            }
+                            else
+                            {
+                                count = 0;
+                                break;
+                            }
+                        }
+
+                        //horizontal
+                        for (int x = 0; x < 5; x++)
+                        {
+                            if (arrBoard[piece.X, piece.Y] == arrBoard[x, piece.Y])
+                            {
+                                count++;
+                            }
+                            else
+                            {
+                                count = 0;
+                                break;
+                            }
+                        }
+
+                        //horizontal
+                        for (int x = 0; x < 5; x++)
+                        {
+                            if (arrBoard[piece.X, piece.Y] == arrBoard[x, piece.Y])
+                            {
+                                count++;
+                            }
+                            else
+                            {
+                                count = 0;
+                                break;
+                            }
+                        }
+
+                        //right diagonal
+                        for (int d = 0; d < 5; d++)
+                        {
+                            if (arrBoard[piece.X, piece.Y] == arrBoard[d, d])
+                            {
+                                count++;
+                            }
+                            else
+                            {
+                                count = 0;
+                                break;
+                            }
+                        }
+
+                        if (count==5)
+                        {
+                            return 1; 
+                        }
+                       else return -1;   
+                       
+
+                    }
             }
-            else return new Vector2(0, 0);
         }
     }
 }
