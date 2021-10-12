@@ -1,6 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Assets.Script
 {
@@ -16,8 +18,10 @@ namespace Assets.Script
 
         public static Controller controller;
 
-        private bool gameOver;
+        public event Action<string> onGameOver;
 
+        private bool gameOver;
+        [SerializeField]
         private int finalResult=-999;
 
         private int availableMove = 0;
@@ -26,9 +30,9 @@ namespace Assets.Script
 
         public GameObject y_Obj;
 
-        public char[,] arrBoard = new char[3, 3];
+        public char[,] arrBoard = new char[5, 5];
 
-        public PieceBoard[,] arrPiece = new PieceBoard[3, 3];
+        public PieceBoard[,] arrPiece = new PieceBoard[5, 5];
 
         public enum DirectionPoint { TopLeft, TopRight, BotLeft, BotRight, MiddleRow,MiddleColumn,Central,None }
         private void Start()
@@ -36,9 +40,9 @@ namespace Assets.Script
             playerTurn = true;
             int count = 0;
 
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 5; i++)
             {
-                for (int j = 0; j < 3; j++)
+                for (int j = 0; j < 5; j++)
                 {
                     arrBoard[i, j] = emptyChar;
                     arrPiece[i, j] = transform.GetChild(count).GetComponent<PieceBoard>();
@@ -64,7 +68,12 @@ namespace Assets.Script
                         SetUpMove(piece.X, piece.Y);
                         SpawmCaroChar(piece);
 
-                        CheckWin(piece);
+                        //CheckWin(piece);
+
+                        //Check 5x5
+                        var point = CheckCurrentPoint(piece);
+                        CheckWinV2(point, piece);
+
                         LastResult(finalResult);
                         playerTurn = false;
 
@@ -117,10 +126,13 @@ namespace Assets.Script
                 PieceBoard selectPiece = arrPiece[_x, _y];
                 SetUpMove(selectPiece.X, selectPiece.Y);
                 SpawmCaroChar(selectPiece);
-                CheckWin(selectPiece);
+                // CheckWin(selectPiece);
 
-                int check = finalResult;
-                LastResult(check);
+                //Check 5x5
+                var point = CheckCurrentPoint(selectPiece);
+                CheckWinV2(point, selectPiece);
+
+                LastResult(finalResult);
                 playerTurn = true;
             }
         }
@@ -132,11 +144,13 @@ namespace Assets.Script
             {
                 Debug.Log("Win");
                 gameOver = true;
+                onGameOver?.Invoke("Someone Won!");
             }
             else if (check == 0)
             {
                 Debug.Log("Tie");
                 gameOver = true;
+                onGameOver?.Invoke("Tie!");
             }
         }
 
@@ -144,17 +158,24 @@ namespace Assets.Script
         {
             _x = 0;
             _y = 0;
-            for (int x = 0; x < 3; x++)
+            while (arrPiece[_x, _y].hasChar)
             {
-                for (int y = 0; y < 3; y++)
-                    if (!arrPiece[x, y].hasChar)
-                    {
-                        arrPiece[x, y].hasChar = true;
-                        _x = x;
-                        _y = y;
-                        return;
-                    }
+                _x = UnityEngine.Random.Range(0, 5);
+                _y = UnityEngine.Random.Range(0, 5);
             }
+            arrPiece[_x, _y].hasChar = true;
+
+            //for (int x = 0; x < 5; x++)
+            //{
+            //    for (int y = 0; y < 5; y++)
+            //        if (!arrPiece[x, y].hasChar)
+            //        {
+            //            arrPiece[x, y].hasChar = true;
+            //            _x = x;
+            //            _y = y;
+            //            return;
+            //        }
+            //}
         }
 
         public void CheckWin(PieceBoard curPiece)
@@ -261,55 +282,23 @@ namespace Assets.Script
             else return DirectionPoint.None;
         }
 
-        private int CheckWinV2(DirectionPoint point,PieceBoard piece)
+        private void CheckWinV2(DirectionPoint point,PieceBoard piece)
         {
+            if (availableMove == 25)
+                return;
+
             switch(point)
             {
                 case DirectionPoint.BotLeft:
+                case DirectionPoint.TopRight:
                     {
-                        int count = 0;
-                        //vertical
-                       for(int y=0;y<5;y++)
+                        int count;
+                        count = ColumnAndRow(piece);
+                        if (count == 5)
                         {
-                            if (arrBoard[piece.X, piece.Y] == arrBoard[piece.X, y])
-                            {
-                                count++;
-                            }
-                            else
-                            {
-                                count = 0;
-                                break;
-                            }
+                            finalResult = 1;
+                            return;
                         }
-
-                        //horizontal
-                        for (int x = 0; x < 5; x++)
-                        {
-                            if (arrBoard[piece.X, piece.Y] == arrBoard[x, piece.Y])
-                            {
-                                count++;
-                            }
-                            else
-                            {
-                                count = 0;
-                                break;
-                            }
-                        }
-
-                        //horizontal
-                        for (int x = 0; x < 5; x++)
-                        {
-                            if (arrBoard[piece.X, piece.Y] == arrBoard[x, piece.Y])
-                            {
-                                count++;
-                            }
-                            else
-                            {
-                                count = 0;
-                                break;
-                            }
-                        }
-
                         //right diagonal
                         for (int d = 0; d < 5; d++)
                         {
@@ -324,15 +313,120 @@ namespace Assets.Script
                             }
                         }
 
-                        if (count==5)
+                        if (count == 5)
                         {
-                            return 1; 
+                            finalResult= 1;
                         }
-                       else return -1;   
-                       
+                        else finalResult= - 999;
+
+                        return;
+                    }
+                case DirectionPoint.TopLeft:
+                case DirectionPoint.BotRight:
+                    {
+                        int count;
+                        count = ColumnAndRow(piece);
+                        if (count == 5)
+                        {
+                            finalResult = 1;
+                             return;
+                        }
+
+                        //left diagonal
+                        int tmp=4;
+                        for (int d = 0; d < 5; d++)
+                        {
+                            if (arrBoard[piece.X, piece.Y] == arrBoard[d, tmp])
+                            {
+                                tmp--;
+                                count++;
+                            }
+                            else
+                            {
+                                count = 0;
+                                break;
+                            }
+                        }
+
+                        if (count == 5)
+                        {
+                            finalResult= 1;
+                        }
+                        else finalResult= - 999;
+                        break;
 
                     }
+                case DirectionPoint.Central:
+                    {
+                        int count = ColumnAndRow(piece);
+                        if (count == 5)
+                        {
+                            finalResult= 1;
+                        }
+                        else finalResult= - 999;
+                        break;
+                    }
+                case DirectionPoint.MiddleColumn:
+                    {
+                        int count = ColumnAndRow(piece);
+                        if (count == 5)
+                        {
+                            finalResult= 1;
+                        }
+                        else finalResult= - 999;
+                        break;
+                    }
+                case DirectionPoint.MiddleRow:
+                    {
+                        int count = ColumnAndRow(piece);
+                        if (count == 5)
+                        {
+                            finalResult= 1;
+                        }
+                        else finalResult= - 999;
+                        break;
+                    }
             }
+
+            return;
+        }
+    private int ColumnAndRow(PieceBoard piece)
+        {
+            //vertical
+            int count = 0;
+            for (int y = 0; y < 5; y++)
+            {
+                if (arrBoard[piece.X, piece.Y] == arrBoard[piece.X, y])
+                {
+                    count++;
+                }
+                else
+                {
+                    count = 0;
+                    break;
+                }
+            }
+            if (count == 5)
+                return count;
+
+            //horizontal
+            for (int x = 0; x < 5; x++)
+            {
+                if (arrBoard[piece.X, piece.Y] == arrBoard[x, piece.Y])
+                {
+                    count++;
+                }
+                else
+                {
+                    count = 0;
+                    break;
+                }
+            }
+            return count;
+        }
+        public void RestartGame()
+        {
+            SceneManager.LoadScene(0);
         }
     }
 }
