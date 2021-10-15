@@ -10,11 +10,15 @@ namespace Assets.Script
     {
         public bool playerTurn;
 
+        private const int Inf = 999;
+
         private char playerChar = 'X';
 
         private char botChar = 'O';
 
         private char emptyChar = ' ';
+
+        private PieceBoard lastPiece;
 
         public static Controller controller;
 
@@ -22,7 +26,7 @@ namespace Assets.Script
         [SerializeField]
         private bool gameOver;
         [SerializeField]
-        private int finalResult=-999;
+        private int finalResult=-Inf;
         [SerializeField]
         private int availableMove = 0;
 
@@ -83,7 +87,8 @@ namespace Assets.Script
                 LastResult(finalResult);
                 playerTurn = false;
 
-                BotMove();
+                // BotMove();
+                AIMovement();
             }
         }
         private void SpawmCaroChar(PieceBoard piece)
@@ -139,7 +144,103 @@ namespace Assets.Script
                 playerTurn = true;
             }
         }
+        private void AIMovement()
+        {
+            int _x = 0;
+            int _y = 0;
+            if (availableMove <= 3)
+            {
+                _x = UnityEngine.Random.Range(0, 5);
+                _y = UnityEngine.Random.Range(0, 5);
+            }
+            else
+            {
+                int bestScore = Inf;
 
+                for (int x = 0; x < 5; x++)
+                {
+                    for (int y = 0; y < 5; y++)
+                    {
+                        if (arrBoard[x, y] == emptyChar)
+                        {
+                            arrBoard[x, y] = botChar;
+                            int score = Minimax(arrBoard, 0, true);
+                            arrBoard[x, y] = emptyChar;
+                            if (score < bestScore)
+                            {
+                                _x = x;
+                                _y = y;
+                            }
+                        }
+                    }
+                }
+
+            }
+                arrBoard[_x, _y] = botChar;
+                PieceBoard selectPiece = arrPiece[_x, _y];
+                 lastPiece = selectPiece;
+                SetUpMove(selectPiece.X, selectPiece.Y);
+                SpawmCaroChar(selectPiece);
+
+                var point = CheckCurrentPoint(selectPiece);
+                CheckWinV2(point, selectPiece);
+
+                LastResult(finalResult);
+                playerTurn = true;
+        }
+
+        private int Minimax(char[,] checkBoard,int depth, bool isHuman)
+        {
+            CheckWinV2(CheckCurrentPoint(lastPiece), lastPiece);
+            switch(finalResult)
+            {
+                case -1:
+                case 0:
+                case 1:
+                    {
+                        LastResult(finalResult);
+                        return 0;
+                    }
+            }
+
+            if(isHuman)
+            {
+                int bestScore = -Inf;
+                for (int x = 0; x < 5; x++)
+                {
+                    for (int y = 0; y < 5; y++)
+                    {
+                        if(checkBoard[x,y]==emptyChar)
+                        {
+                            checkBoard[x, y] = playerChar;
+                            int curScore = Minimax(checkBoard, depth++, false);
+                            checkBoard[x, y] = emptyChar;
+                            bestScore = Math.Max(bestScore, curScore);
+                        }
+                    }
+                }
+                return bestScore;
+            }
+            else
+            {
+                int bestScore = Inf;
+                for (int x = 0; x < 5; x++)
+                {
+                    for (int y = 0; y < 5; y++)
+                    {
+                        if (checkBoard[x, y] == emptyChar)
+                        {
+                            checkBoard[x, y] = botChar;
+                            int curScore = Minimax(checkBoard, depth++, true);
+                            checkBoard[x, y] = emptyChar;
+                            bestScore = Math.Min(bestScore, curScore);
+                        }
+                    }
+                }
+                return bestScore;
+            }
+
+        }
         private void LastResult(int check)
         {
            
@@ -394,7 +495,7 @@ namespace Assets.Script
             }
 
         }
-    private int ColumnAndRow(PieceBoard piece)
+        private int ColumnAndRow(PieceBoard piece)
         {
             //vertical
             int count = 0;
