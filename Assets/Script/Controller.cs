@@ -19,11 +19,11 @@ namespace Assets.Script
         public static Controller controller;
 
         public event Action<string> onGameOver;
-
+        [SerializeField]
         private bool gameOver;
         [SerializeField]
         private int finalResult=-999;
-
+        [SerializeField]
         private int availableMove = 0;
 
         public GameObject x_Obj;
@@ -62,27 +62,30 @@ namespace Assets.Script
             {
                 if (Input.GetMouseButtonDown(0))
                 {
-                    var piece = CheckRayscat();
-                    if (piece != null)
-                    {
-                        SetUpMove(piece.X, piece.Y);
-                        SpawmCaroChar(piece);
-
-                        //CheckWin(piece);
-
-                        //Check 5x5
-                        var point = CheckCurrentPoint(piece);
-                        CheckWinV2(point, piece);
-
-                        LastResult(finalResult);
-                        playerTurn = false;
-
-                        BotMove();
-                    }
+                    HandleRayscat();
                 }
             }
         }
+        private void HandleRayscat()
+        {
+            var piece = CheckRayscat();
+            if (piece != null)
+            {
+                SetUpMove(piece.X, piece.Y);
+                SpawmCaroChar(piece);
 
+                //CheckWin(piece);
+
+                //Check 5x5
+                var point = CheckCurrentPoint(piece);
+                CheckWinV2(point, piece);
+
+                LastResult(finalResult);
+                playerTurn = false;
+
+                BotMove();
+            }
+        }
         private void SpawmCaroChar(PieceBoard piece)
         {
             piece.SetUpNewChar(playerTurn);
@@ -112,7 +115,7 @@ namespace Assets.Script
             {
                 arrBoard[_x, _y] = botChar;
             }
-
+            availableMove++;
         }
 
         private void BotMove()
@@ -178,76 +181,76 @@ namespace Assets.Script
             //}
         }
 
-        public void CheckWin(PieceBoard curPiece)
-        {
-            for (int y = 0; y < 3; y++)
-            {
-                if (arrBoard[y, 0] == arrBoard[y, 1] && arrBoard[y, 0] == arrBoard[y, 2])
-                {
-                    if (arrBoard[y, 0] == playerChar)
-                    {
-                        Debug.Log("Doc");
-                        finalResult = 1;
-                    }
-                    else if (arrBoard[y, 0] == botChar)
-                    {
-                        finalResult = -1;
-                    }
-                }
-            }
-            //Ngang
-            for (int x = 0; x < 3; x++)
-            {
-                if (arrBoard[0, x] == arrBoard[1, x] && arrBoard[0, x] == arrBoard[2, x])
-                {
-                    if (arrBoard[0, x] == playerChar)
-                    {
-                        Debug.Log("Ngang");
-                        finalResult = 1;
-                    }
-                    else if (arrBoard[0, x] == botChar)
-                    {
-                        finalResult = -1;
-                    }
-                }
-            }
+        //public void CheckWin(PieceBoard curPiece)
+        //{
+        //    for (int y = 0; y < 3; y++)
+        //    {
+        //        if (arrBoard[y, 0] == arrBoard[y, 1] && arrBoard[y, 0] == arrBoard[y, 2])
+        //        {
+        //            if (arrBoard[y, 0] == playerChar)
+        //            {
+        //                Debug.Log("Doc");
+        //                finalResult = 1;
+        //            }
+        //            else if (arrBoard[y, 0] == botChar)
+        //            {
+        //                finalResult = -1;
+        //            }
+        //        }
+        //    }
+        //    //Ngang
+        //    for (int x = 0; x < 3; x++)
+        //    {
+        //        if (arrBoard[0, x] == arrBoard[1, x] && arrBoard[0, x] == arrBoard[2, x])
+        //        {
+        //            if (arrBoard[0, x] == playerChar)
+        //            {
+        //                Debug.Log("Ngang");
+        //                finalResult = 1;
+        //            }
+        //            else if (arrBoard[0, x] == botChar)
+        //            {
+        //                finalResult = -1;
+        //            }
+        //        }
+        //    }
 
-            //Cheo
-            if (arrBoard[0, 0] == arrBoard[1, 1] && arrBoard[0, 0] == arrBoard[2, 2])
-            {
-                Debug.Log("Cheo1");
-                if (arrBoard[1, 1] == playerChar)
-                {
+        //    //Cheo
+        //    if (arrBoard[0, 0] == arrBoard[1, 1] && arrBoard[0, 0] == arrBoard[2, 2])
+        //    {
+        //        Debug.Log("Cheo1");
+        //        if (arrBoard[1, 1] == playerChar)
+        //        {
                     
-                    finalResult = 1;
-                }
-                else if (arrBoard[1, 1] == botChar)
-                {
-                    finalResult = -1;
-                }
-            }
+        //            finalResult = 1;
+        //        }
+        //        else if (arrBoard[1, 1] == botChar)
+        //        {
+        //            finalResult = -1;
+        //        }
+        //    }
 
-            if (arrBoard[0, 2] == arrBoard[1, 1] && arrBoard[0, 2] == arrBoard[2, 0])
-            { Debug.Log("Cheo2");
-                if (arrBoard[1, 1] == playerChar)
-                {
+        //    if (arrBoard[0, 2] == arrBoard[1, 1] && arrBoard[0, 2] == arrBoard[2, 0])
+        //    { Debug.Log("Cheo2");
+        //        if (arrBoard[1, 1] == playerChar)
+        //        {
                    
-                    finalResult = 1;
-                }
-                else if (arrBoard[1, 1] == botChar)
-                {
-                    finalResult = -1;
-                }
-            }
-            //Hoa
-            if (availableMove == 9)
-            {
-                Debug.Log("Tie");
-                finalResult = 0;
-            }
-            else return;
+        //            finalResult = 1;
+        //        }
+        //        else if (arrBoard[1, 1] == botChar)
+        //        {
+        //            finalResult = -1;
+        //        }
+        //    }
+        //    //Hoa
+        //    if (availableMove == 9)
+        //    {
+        //        Debug.Log("Tie");
+        //        finalResult = 0;
+        //    }
+        //    else return;
 
-        }
+        //}
 
         private DirectionPoint CheckCurrentPoint(PieceBoard start)
         {
@@ -284,9 +287,6 @@ namespace Assets.Script
 
         private void CheckWinV2(DirectionPoint point,PieceBoard piece)
         {
-            if (availableMove == 25)
-                return;
-
             switch(point)
             {
                 case DirectionPoint.BotLeft:
@@ -317,9 +317,9 @@ namespace Assets.Script
                         {
                             finalResult= 1;
                         }
-                        else finalResult= - 999;
+                        else finalResult= - 55;
 
-                        return;
+                        break;
                     }
                 case DirectionPoint.TopLeft:
                 case DirectionPoint.BotRight:
@@ -352,7 +352,7 @@ namespace Assets.Script
                         {
                             finalResult= 1;
                         }
-                        else finalResult= - 999;
+                        else finalResult= - 66;
                         break;
 
                     }
@@ -363,7 +363,7 @@ namespace Assets.Script
                         {
                             finalResult= 1;
                         }
-                        else finalResult= - 999;
+                        else finalResult= - 77;
                         break;
                     }
                 case DirectionPoint.MiddleColumn:
@@ -373,7 +373,7 @@ namespace Assets.Script
                         {
                             finalResult= 1;
                         }
-                        else finalResult= - 999;
+                        else finalResult= - 88;
                         break;
                     }
                 case DirectionPoint.MiddleRow:
@@ -383,12 +383,16 @@ namespace Assets.Script
                         {
                             finalResult= 1;
                         }
-                        else finalResult= - 999;
+                        else finalResult= - 99;
                         break;
                     }
             }
+            if (availableMove == 25)
+            {
+                finalResult = 0;
+                return;
+            }
 
-            return;
         }
     private int ColumnAndRow(PieceBoard piece)
         {
