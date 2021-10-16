@@ -17,7 +17,7 @@ namespace Assets.Script
         private char botChar = 'O';
 
         private char emptyChar = ' ';
-
+        [SerializeField]
         private PieceBoard lastPiece;
 
         public static Controller controller;
@@ -26,7 +26,7 @@ namespace Assets.Script
         [SerializeField]
         private bool gameOver;
         [SerializeField]
-        private int finalResult=-Inf;
+        private int finalResult = -Inf;
         [SerializeField]
         private int availableMove = 0;
 
@@ -34,19 +34,19 @@ namespace Assets.Script
 
         public GameObject y_Obj;
 
-        public char[,] arrBoard = new char[5, 5];
+        public char[,] arrBoard = new char[3, 3];
 
-        public PieceBoard[,] arrPiece = new PieceBoard[5, 5];
+        public PieceBoard[,] arrPiece = new PieceBoard[3, 3];
 
-        public enum DirectionPoint { TopLeft, TopRight, BotLeft, BotRight, MiddleRow,MiddleColumn,Central,None }
+        public enum DirectionPoint { TopLeft, TopRight, BotLeft, BotRight, MiddleRow, MiddleColumn, Central, None }
         private void Start()
         {
             playerTurn = true;
             int count = 0;
 
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 3; i++)
             {
-                for (int j = 0; j < 5; j++)
+                for (int j = 0; j < 3; j++)
                 {
                     arrBoard[i, j] = emptyChar;
                     arrPiece[i, j] = transform.GetChild(count).GetComponent<PieceBoard>();
@@ -60,6 +60,20 @@ namespace Assets.Script
             controller = this;
         }
 
+        [SerializeField]
+        char[] checkArr = new char[9];
+        private void TEST()
+        {
+            int count = 0;
+            for (int i = 0; i < 3; i++)
+            {
+                for (int u = 0; u < 3; u++)
+                {
+                    checkArr[count] = arrBoard[i, u];
+                    count++;
+                }
+            }
+        }
         private void Update()
         {
             if (playerTurn && !gameOver)
@@ -69,6 +83,7 @@ namespace Assets.Script
                     HandleRayscat();
                 }
             }
+            TEST();
         }
         private void HandleRayscat()
         {
@@ -80,15 +95,17 @@ namespace Assets.Script
 
                 //CheckWin(piece);
 
-                //Check 5x5
+                //Check 3x3
                 var point = CheckCurrentPoint(piece);
-                CheckWinV2(point, piece);
+                //  CheckWinV2(point, piece);
 
-                LastResult(finalResult);
+                
+                LastResult(CheckWin());
                 playerTurn = false;
 
-                // BotMove();
-                AIMovement();
+                if (!gameOver)
+                    AIMovement();
+
             }
         }
         private void SpawmCaroChar(PieceBoard piece)
@@ -136,85 +153,78 @@ namespace Assets.Script
                 SpawmCaroChar(selectPiece);
                 // CheckWin(selectPiece);
 
-                //Check 5x5
+                //Check 3x3
                 var point = CheckCurrentPoint(selectPiece);
-                CheckWinV2(point, selectPiece);
-
-                LastResult(finalResult);
+                //CheckWinV2(point, selectPiece);
+                LastResult(CheckWin());
                 playerTurn = true;
             }
         }
         private void AIMovement()
         {
-            int _x = 0;
-            int _y = 0;
-            if (availableMove <= 3)
-            {
-                _x = UnityEngine.Random.Range(0, 5);
-                _y = UnityEngine.Random.Range(0, 5);
-            }
-            else
-            {
-                int bestScore = Inf;
+            int _x = Inf;
+            int _y = Inf;
 
-                for (int x = 0; x < 5; x++)
+            int bestScore = -Inf;
+            for (int x = 0; x < 3; x++)
+            {
+                for (int y = 0; y < 3; y++)
                 {
-                    for (int y = 0; y < 5; y++)
+                    if (arrBoard[x, y] == emptyChar)
                     {
-                        if (arrBoard[x, y] == emptyChar)
+                        arrBoard[x, y] = botChar;
+                        availableMove++;
+                        int score = Minimax(arrBoard, 0, false, x, y);
+                        arrBoard[x, y] = emptyChar;
+                        availableMove--;
+                        if (score > bestScore)
                         {
-                            arrBoard[x, y] = botChar;
-                            int score = Minimax(arrBoard, 0, true);
-                            arrBoard[x, y] = emptyChar;
-                            if (score < bestScore)
-                            {
-                                _x = x;
-                                _y = y;
-                            }
+                            bestScore = score;
+                            _x = x;
+                            _y = y;
                         }
                     }
                 }
-
             }
-                arrBoard[_x, _y] = botChar;
-                PieceBoard selectPiece = arrPiece[_x, _y];
-                 lastPiece = selectPiece;
-                SetUpMove(selectPiece.X, selectPiece.Y);
-                SpawmCaroChar(selectPiece);
-
-                var point = CheckCurrentPoint(selectPiece);
-                CheckWinV2(point, selectPiece);
-
-                LastResult(finalResult);
-                playerTurn = true;
+            arrBoard[_x, _y] = botChar;
+            PieceBoard selectPiece = arrPiece[_x, _y];
+            SetUpMove(_x, _y);
+            SpawmCaroChar(selectPiece);
+         
+            LastResult(CheckWin());
+            playerTurn = true;
         }
-
-        private int Minimax(char[,] checkBoard,int depth, bool isHuman)
+        private int Minimax(char[,] checkBoard, int depth, bool isMaximum, int horizon, int vertical)
         {
-            CheckWinV2(CheckCurrentPoint(lastPiece), lastPiece);
-            switch(finalResult)
+            //  PieceBoard piece= new PieceBoard(horizon,vertical);
+            // CheckWinV2(CheckCurrentPoint(piece), piece);
+            int tmp = CheckWin();
+            if (tmp == 0)
             {
-                case -1:
-                case 0:
-                case 1:
-                    {
-                        LastResult(finalResult);
-                        return 0;
-                    }
+                return tmp; 
             }
-
-            if(isHuman)
+            else if (tmp == 1)
+            {
+                return -10;
+            }
+            else if (tmp == -1)
+            {
+                return 10 - depth;
+            }
+            if (isMaximum)
             {
                 int bestScore = -Inf;
-                for (int x = 0; x < 5; x++)
+                for (int x = 0; x < 3; x++)
                 {
-                    for (int y = 0; y < 5; y++)
+                    for (int y = 0; y < 3; y++)
                     {
-                        if(checkBoard[x,y]==emptyChar)
+                        if (checkBoard[x, y] == emptyChar)
                         {
-                            checkBoard[x, y] = playerChar;
-                            int curScore = Minimax(checkBoard, depth++, false);
+                            checkBoard[x, y] = botChar;
+                            availableMove++;
+                            int curScore = Minimax(checkBoard, depth++, false, x, y);
                             checkBoard[x, y] = emptyChar;
+                            availableMove--;
                             bestScore = Math.Max(bestScore, curScore);
                         }
                     }
@@ -224,15 +234,17 @@ namespace Assets.Script
             else
             {
                 int bestScore = Inf;
-                for (int x = 0; x < 5; x++)
+                for (int x = 0; x < 3; x++)
                 {
-                    for (int y = 0; y < 5; y++)
+                    for (int y = 0; y < 3; y++)
                     {
                         if (checkBoard[x, y] == emptyChar)
                         {
-                            checkBoard[x, y] = botChar;
-                            int curScore = Minimax(checkBoard, depth++, true);
+                            checkBoard[x, y] = playerChar;
+                            availableMove++;
+                            int curScore = Minimax(checkBoard, depth++, true, x, y);
                             checkBoard[x, y] = emptyChar;
+                            availableMove--;
                             bestScore = Math.Min(bestScore, curScore);
                         }
                     }
@@ -243,16 +255,14 @@ namespace Assets.Script
         }
         private void LastResult(int check)
         {
-           
-            if (check == 1)
+
+            if (check == 1 || check == -1)
             {
-                Debug.Log("Win");
                 gameOver = true;
                 onGameOver?.Invoke("Someone Won!");
             }
             else if (check == 0)
             {
-                Debug.Log("Tie");
                 gameOver = true;
                 onGameOver?.Invoke("Tie!");
             }
@@ -264,14 +274,14 @@ namespace Assets.Script
             _y = 0;
             while (arrPiece[_x, _y].hasChar)
             {
-                _x = UnityEngine.Random.Range(0, 5);
-                _y = UnityEngine.Random.Range(0, 5);
+                _x = UnityEngine.Random.Range(0, 3);
+                _y = UnityEngine.Random.Range(0, 3);
             }
             arrPiece[_x, _y].hasChar = true;
 
-            //for (int x = 0; x < 5; x++)
+            //for (int x = 0; x < 3; x++)
             //{
-            //    for (int y = 0; y < 5; y++)
+            //    for (int y = 0; y < 3; y++)
             //        if (!arrPiece[x, y].hasChar)
             //        {
             //            arrPiece[x, y].hasChar = true;
@@ -282,76 +292,74 @@ namespace Assets.Script
             //}
         }
 
-        //public void CheckWin(PieceBoard curPiece)
-        //{
-        //    for (int y = 0; y < 3; y++)
-        //    {
-        //        if (arrBoard[y, 0] == arrBoard[y, 1] && arrBoard[y, 0] == arrBoard[y, 2])
-        //        {
-        //            if (arrBoard[y, 0] == playerChar)
-        //            {
-        //                Debug.Log("Doc");
-        //                finalResult = 1;
-        //            }
-        //            else if (arrBoard[y, 0] == botChar)
-        //            {
-        //                finalResult = -1;
-        //            }
-        //        }
-        //    }
-        //    //Ngang
-        //    for (int x = 0; x < 3; x++)
-        //    {
-        //        if (arrBoard[0, x] == arrBoard[1, x] && arrBoard[0, x] == arrBoard[2, x])
-        //        {
-        //            if (arrBoard[0, x] == playerChar)
-        //            {
-        //                Debug.Log("Ngang");
-        //                finalResult = 1;
-        //            }
-        //            else if (arrBoard[0, x] == botChar)
-        //            {
-        //                finalResult = -1;
-        //            }
-        //        }
-        //    }
+        public int CheckWin()
+        {
+            for (int y = 0; y < 3; y++)
+            {
+                if (arrBoard[y, 0] == arrBoard[y, 1] && arrBoard[y, 0] == arrBoard[y, 2])
+                {
+                    if (arrBoard[y, 0] == playerChar)
+                    {
+                        return 1;
+                    }
+                    else if (arrBoard[y, 0] == botChar)
+                    {
+                        return -1;
+                    }
+                }
+            }
+            //Ngang
+            for (int x = 0; x < 3; x++)
+            {
+                if (arrBoard[0, x] == arrBoard[1, x] && arrBoard[0, x] == arrBoard[2, x])
+                {
+                    if (arrBoard[0, x] == playerChar)
+                    {
+                        return 1;
+                    }
+                    else if (arrBoard[0, x] == botChar)
+                    {
+                        return -1;
+                    }
+                }
+            }
 
-        //    //Cheo
-        //    if (arrBoard[0, 0] == arrBoard[1, 1] && arrBoard[0, 0] == arrBoard[2, 2])
-        //    {
-        //        Debug.Log("Cheo1");
-        //        if (arrBoard[1, 1] == playerChar)
-        //        {
-                    
-        //            finalResult = 1;
-        //        }
-        //        else if (arrBoard[1, 1] == botChar)
-        //        {
-        //            finalResult = -1;
-        //        }
-        //    }
+            //Cheo
+            if (arrBoard[0, 0] == arrBoard[1, 1] && arrBoard[0, 0] == arrBoard[2, 2])
+            {
+                if (arrBoard[1, 1] == playerChar)
+                {
 
-        //    if (arrBoard[0, 2] == arrBoard[1, 1] && arrBoard[0, 2] == arrBoard[2, 0])
-        //    { Debug.Log("Cheo2");
-        //        if (arrBoard[1, 1] == playerChar)
-        //        {
-                   
-        //            finalResult = 1;
-        //        }
-        //        else if (arrBoard[1, 1] == botChar)
-        //        {
-        //            finalResult = -1;
-        //        }
-        //    }
-        //    //Hoa
-        //    if (availableMove == 9)
-        //    {
-        //        Debug.Log("Tie");
-        //        finalResult = 0;
-        //    }
-        //    else return;
+                    return 1;
+                }
+                else if (arrBoard[1, 1] == botChar)
+                {
+                    return -1;
+                }
+            }
 
-        //}
+            if (arrBoard[0, 2] == arrBoard[1, 1] && arrBoard[0, 2] == arrBoard[2, 0])
+            {
+                if (arrBoard[1, 1] == playerChar)
+                {
+
+                    return 1;
+                }
+                else if (arrBoard[1, 1] == botChar)
+                {
+                    return -1;
+                }
+            }
+            //Hoa
+            if (availableMove >= 9)
+            {
+                return 0;
+            }
+            else
+            {
+                return Inf;
+            }
+        }
 
         private DirectionPoint CheckCurrentPoint(PieceBoard start)
         {
@@ -386,149 +394,149 @@ namespace Assets.Script
             else return DirectionPoint.None;
         }
 
-        private void CheckWinV2(DirectionPoint point,PieceBoard piece)
-        {
-            switch(point)
-            {
-                case DirectionPoint.BotLeft:
-                case DirectionPoint.TopRight:
-                    {
-                        int count;
-                        count = ColumnAndRow(piece);
-                        if (count == 5)
-                        {
-                            finalResult = 1;
-                            return;
-                        }
-                        //right diagonal
-                        for (int d = 0; d < 5; d++)
-                        {
-                            if (arrBoard[piece.X, piece.Y] == arrBoard[d, d])
-                            {
-                                count++;
-                            }
-                            else
-                            {
-                                count = 0;
-                                break;
-                            }
-                        }
+        //private void CheckWinV2(DirectionPoint point,PieceBoard piece)
+        //{
+        //    switch(point)
+        //    {
+        //        case DirectionPoint.BotLeft:
+        //        case DirectionPoint.TopRight:
+        //            {
+        //                int count;
+        //                count = ColumnAndRow(piece);
+        //                if (count == 3)
+        //                {
+        //                    finalResult = 1;
+        //                    return;
+        //                }
+        //                //right diagonal
+        //                for (int d = 0; d < 3; d++)
+        //                {
+        //                    if (arrBoard[piece.X, piece.Y] == arrBoard[d, d])
+        //                    {
+        //                        count++;
+        //                    }
+        //                    else
+        //                    {
+        //                        count = 0;
+        //                        break;
+        //                    }
+        //                }
 
-                        if (count == 5)
-                        {
-                            finalResult= 1;
-                        }
-                        else finalResult= - 55;
+        //                if (count == 3)
+        //                {
+        //                    finalResult= 1;
+        //                }
+        //                else finalResult= - 33;
 
-                        break;
-                    }
-                case DirectionPoint.TopLeft:
-                case DirectionPoint.BotRight:
-                    {
-                        int count;
-                        count = ColumnAndRow(piece);
-                        if (count == 5)
-                        {
-                            finalResult = 1;
-                             return;
-                        }
+        //                break;
+        //            }
+        //        case DirectionPoint.TopLeft:
+        //        case DirectionPoint.BotRight:
+        //            {
+        //                int count;
+        //                count = ColumnAndRow(piece);
+        //                if (count == 3)
+        //                {
+        //                    finalResult = 1;
+        //                     return;
+        //                }
 
-                        //left diagonal
-                        int tmp=4;
-                        for (int d = 0; d < 5; d++)
-                        {
-                            if (arrBoard[piece.X, piece.Y] == arrBoard[d, tmp])
-                            {
-                                tmp--;
-                                count++;
-                            }
-                            else
-                            {
-                                count = 0;
-                                break;
-                            }
-                        }
+        //                //left diagonal
+        //                int tmp=4;
+        //                for (int d = 0; d < 3; d++)
+        //                {
+        //                    if (arrBoard[piece.X, piece.Y] == arrBoard[d, tmp])
+        //                    {
+        //                        tmp--;
+        //                        count++;
+        //                    }
+        //                    else
+        //                    {
+        //                        count = 0;
+        //                        break;
+        //                    }
+        //                }
 
-                        if (count == 5)
-                        {
-                            finalResult= 1;
-                        }
-                        else finalResult= - 66;
-                        break;
+        //                if (count == 3)
+        //                {
+        //                    finalResult= 1;
+        //                }
+        //                else finalResult= - 66;
+        //                break;
 
-                    }
-                case DirectionPoint.Central:
-                    {
-                        int count = ColumnAndRow(piece);
-                        if (count == 5)
-                        {
-                            finalResult= 1;
-                        }
-                        else finalResult= - 77;
-                        break;
-                    }
-                case DirectionPoint.MiddleColumn:
-                    {
-                        int count = ColumnAndRow(piece);
-                        if (count == 5)
-                        {
-                            finalResult= 1;
-                        }
-                        else finalResult= - 88;
-                        break;
-                    }
-                case DirectionPoint.MiddleRow:
-                    {
-                        int count = ColumnAndRow(piece);
-                        if (count == 5)
-                        {
-                            finalResult= 1;
-                        }
-                        else finalResult= - 99;
-                        break;
-                    }
-            }
-            if (availableMove == 25)
-            {
-                finalResult = 0;
-                return;
-            }
+        //            }
+        //        case DirectionPoint.Central:
+        //            {
+        //                int count = ColumnAndRow(piece);
+        //                if (count == 3)
+        //                {
+        //                    finalResult= 1;
+        //                }
+        //                else finalResult= - 77;
+        //                break;
+        //            }
+        //        case DirectionPoint.MiddleColumn:
+        //            {
+        //                int count = ColumnAndRow(piece);
+        //                if (count == 3)
+        //                {
+        //                    finalResult= 1;
+        //                }
+        //                else finalResult= - 88;
+        //                break;
+        //            }
+        //        case DirectionPoint.MiddleRow:
+        //            {
+        //                int count = ColumnAndRow(piece);
+        //                if (count == 3)
+        //                {
+        //                    finalResult= 1;
+        //                }
+        //                else finalResult= - 99;
+        //                break;
+        //            }
+        //    }
+        //    if (availableMove == 23)
+        //    {
+        //        finalResult = 0;
+        //        return;
+        //    }
 
-        }
-        private int ColumnAndRow(PieceBoard piece)
-        {
-            //vertical
-            int count = 0;
-            for (int y = 0; y < 5; y++)
-            {
-                if (arrBoard[piece.X, piece.Y] == arrBoard[piece.X, y])
-                {
-                    count++;
-                }
-                else
-                {
-                    count = 0;
-                    break;
-                }
-            }
-            if (count == 5)
-                return count;
+        //}
+        //private int ColumnAndRow(PieceBoard piece)
+        //{
+        //    //vertical
+        //    int count = 0;
+        //    for (int y = 0; y < 3; y++)
+        //    {
+        //        if (arrBoard[piece.X, piece.Y] == arrBoard[piece.X, y])
+        //        {
+        //            count++;
+        //        }
+        //        else
+        //        {
+        //            count = 0;
+        //            break;
+        //        }
+        //    }
+        //    if (count == 3)
+        //        return count;
 
-            //horizontal
-            for (int x = 0; x < 5; x++)
-            {
-                if (arrBoard[piece.X, piece.Y] == arrBoard[x, piece.Y])
-                {
-                    count++;
-                }
-                else
-                {
-                    count = 0;
-                    break;
-                }
-            }
-            return count;
-        }
+        //    //horizontal
+        //    for (int x = 0; x < 3; x++)
+        //    {
+        //        if (arrBoard[piece.X, piece.Y] == arrBoard[x, piece.Y])
+        //        {
+        //            count++;
+        //        }
+        //        else
+        //        {
+        //            count = 0;
+        //            break;
+        //        }
+        //    }
+        //    return count;
+        //}
         public void RestartGame()
         {
             SceneManager.LoadScene(0);

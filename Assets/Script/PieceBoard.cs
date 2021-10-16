@@ -16,6 +16,11 @@ namespace Assets.Script
         {
             hasChar = false;
         }
+        public PieceBoard(int horizontal,int vertical)
+        {
+            X = horizontal;
+            Y = vertical;
+        }
 
         public void SetUpNewChar(bool isPlayerTurn)
         {
