@@ -41,15 +41,19 @@ namespace Assets.Script
 
         public PieceBoard[,] arrPiece = new PieceBoard[5, 5];
 
-        private static int aiPoint;
-        private static int humanPoint;
+        private int aiPoint;
+        private int humanPoint;
         [SerializeField]
         private Text aiText;
         [SerializeField]
-        private Text humanText; 
+        private Text humanText;
         public enum DirectionPoint { TopLeft, TopRight, BotLeft, BotRight, MiddleRow, MiddleColumn, Central, None }
         private void Start()
         {
+            aiPoint = PlayerPrefs.GetInt("AI");
+            humanPoint = PlayerPrefs.GetInt("HUMAN");
+            aiText.text = "AI: " + aiPoint.ToString();
+            humanText.text = "YOU: " + humanPoint.ToString();
             playerTurn = true;
             int count = 0;
             gameOver = true;
@@ -77,7 +81,7 @@ namespace Assets.Script
                     HandleRayscat();
                 }
             }
-          //  TEST();
+            //  TEST();
         }
         private void HandleRayscat()
         {
@@ -90,16 +94,16 @@ namespace Assets.Script
                 //CheckWin(piece);
 
                 //Check 5x5
-                var point = CheckCurrentPoint(piece);
+
                 //  CheckWinV2(point, piece);
 
-                
+
                 LastResult(CheckWin());
                 playerTurn = false;
 
                 if (!gameOver)
                     AIMovement();
-                    //BotMove();
+                //BotMove();
 
             }
         }
@@ -137,20 +141,20 @@ namespace Assets.Script
 
         private void BotMove()
         {
-                int _x;
-                int _y;
-                ChooseMove(out _x, out _y);
+            int _x;
+            int _y;
+            ChooseMove(out _x, out _y);
 
-                PieceBoard selectPiece = arrPiece[_x, _y];
-                SetUpMove(selectPiece.X, selectPiece.Y);
-                SpawmCaroChar(selectPiece);
-                // CheckWin(selectPiece);
+            PieceBoard selectPiece = arrPiece[_x, _y];
+            SetUpMove(selectPiece.X, selectPiece.Y);
+            SpawmCaroChar(selectPiece);
+            // CheckWin(selectPiece);
 
-                //Check 5x5
-                var point = CheckCurrentPoint(selectPiece);
-                //CheckWinV2(point, selectPiece);
-                LastResult(CheckWin());
-                playerTurn = true;
+            //Check 5x5
+            //   var point = CheckCurrentPoint(selectPiece);
+            //CheckWinV2(point, selectPiece);
+            LastResult(CheckWin());
+            playerTurn = true;
         }
         private void AIMovement()
         {
@@ -172,7 +176,7 @@ namespace Assets.Script
                         {
                             arrBoard[x, y] = botChar;
                             availableMove++;
-                            int score = Minimax(arrBoard, 0, false, x, y);
+                            int score = Minimax(arrBoard, 0, false);
                             arrBoard[x, y] = emptyChar;
                             availableMove--;
                             if (score > bestScore)
@@ -189,25 +193,25 @@ namespace Assets.Script
             PieceBoard selectPiece = arrPiece[_x, _y];
             SetUpMove(_x, _y);
             SpawmCaroChar(selectPiece);
-         
+
             LastResult(CheckWin());
             playerTurn = true;
         }
-        private int Minimax(char[,] checkBoard, int depth, bool isMaximum, int horizon, int vertical)
+        private int Minimax(char[,] checkBoard, int depth, bool isMaximum)
         {
             //  PieceBoard piece= new PieceBoard(horizon,vertical);
             // CheckWinV2(CheckCurrentPoint(piece), piece);
             if (depth == maxDepth)
             {
                 if (isMaximum)
-                   return 1;
+                    return 1;
                 else return -1;
             }
 
             int tmp = CheckWin();
             if (tmp == 0)
             {
-                return tmp; 
+                return tmp;
             }
             else if (tmp == 1)
             {
@@ -217,7 +221,7 @@ namespace Assets.Script
             {
                 return 10 - depth;
             }
-          //  Debug.Log("depth " + depth);
+            //  Debug.Log("depth " + depth);
 
             if (isMaximum)
             {
@@ -231,7 +235,7 @@ namespace Assets.Script
                             checkBoard[x, y] = botChar;
                             availableMove++;
                             depth++;
-                            int curScore = Minimax(checkBoard, depth, false, x, y);
+                            int curScore = Minimax(checkBoard, depth, false);
                             depth--;
                             checkBoard[x, y] = emptyChar;
                             availableMove--;
@@ -253,7 +257,7 @@ namespace Assets.Script
                             checkBoard[x, y] = playerChar;
                             availableMove++;
                             depth++;
-                            int curScore = Minimax(checkBoard, depth, true, x, y);
+                            int curScore = Minimax(checkBoard, depth, true);
                             depth--;
                             checkBoard[x, y] = emptyChar;
                             availableMove--;
@@ -287,6 +291,8 @@ namespace Assets.Script
                 aiText.text = "AI: " + aiPoint.ToString();
                 onGameOver?.Invoke("AI Won!");
             }
+            PlayerPrefs.SetInt("AI", aiPoint);
+            PlayerPrefs.SetInt("HUMAN", humanPoint);
         }
 
         private void ChooseMove(out int _x, out int _y)
@@ -389,57 +395,58 @@ namespace Assets.Script
             }
         }
 
-        private DirectionPoint CheckCurrentPoint(PieceBoard start)
-        {
-            if (start.X < 2 && start.Y < 2)
-            {
-                return DirectionPoint.BotLeft;
-            }
-            else if (start.X < 2 && start.Y > 2)
-            {
-                return DirectionPoint.TopLeft;
-            }
-            else if (start.X > 2 && start.Y < 2)
-            {
-                return DirectionPoint.BotRight;
-            }
-            else if (start.X > 2 && start.Y > 2)
-            {
-                return DirectionPoint.TopRight;
-            }
-            else if (start.Y == 2)
-            {
-                if (start.X != 2)
-                    return DirectionPoint.MiddleRow;
-                else return DirectionPoint.Central;
-            }
-            else if (start.X == 2)
-            {
-                if (start.Y != 2)
-                    return DirectionPoint.MiddleColumn;
-                else return DirectionPoint.Central;
-            }
-            else return DirectionPoint.None;
-        }
-
-        //private void CheckWinV2(DirectionPoint point,PieceBoard piece)
+        //private DirectionPoint CheckCurrentPoint(int horizontal, int vertical)
         //{
-        //    switch(point)
+        //    if (horizontal < 2 && vertical < 2)
+        //    {
+        //        return DirectionPoint.BotLeft;
+        //    }
+        //    else if (horizontal < 2 && vertical > 2)
+        //    {
+        //        return DirectionPoint.TopLeft;
+        //    }
+        //    else if (horizontal > 2 && vertical < 2)
+        //    {
+        //        return DirectionPoint.BotRight;
+        //    }
+        //    else if (horizontal > 2 && vertical > 2)
+        //    {
+        //        return DirectionPoint.TopRight;
+        //    }
+        //    else if (vertical == 2)
+        //    {
+        //        if (vertical != 2)
+        //            return DirectionPoint.MiddleRow;
+        //        else return DirectionPoint.Central;
+        //    }
+        //    else if (vertical == 2)
+        //    {
+        //        if (vertical != 2)
+        //            return DirectionPoint.MiddleColumn;
+        //        else return DirectionPoint.Central;
+        //    }
+        //    else return DirectionPoint.None;
+        //}
+
+        //private int CheckWinV2(DirectionPoint point, int _x, int _y,bool isMaximum)
+        //{
+        //    int checkWin=-Inf;
+        //    switch (point)
         //    {
         //        case DirectionPoint.BotLeft:
         //        case DirectionPoint.TopRight:
         //            {
         //                int count;
-        //                count = ColumnAndRow(piece);
+        //                count = ColumnAndRow(_x,_y);
         //                if (count == 5)
         //                {
-        //                    finalResult = 1;
-        //                    return;
+        //                    checkWin = 1;
+        //                    break;
         //                }
         //                //right diagonal
         //                for (int d = 0; d < 5; d++)
         //                {
-        //                    if (arrBoard[piece.X, piece.Y] == arrBoard[d, d])
+        //                    if (arrBoard[_x, _y] == arrBoard[d, d])
         //                    {
         //                        count++;
         //                    }
@@ -452,28 +459,27 @@ namespace Assets.Script
 
         //                if (count == 5)
         //                {
-        //                    finalResult= 1;
+        //                    checkWin = 1;
         //                }
-        //                else finalResult= - 55;
-
+        //                else checkWin = -Inf;
         //                break;
         //            }
         //        case DirectionPoint.TopLeft:
         //        case DirectionPoint.BotRight:
         //            {
         //                int count;
-        //                count = ColumnAndRow(piece);
+        //                count = ColumnAndRow(_x,_y);
         //                if (count == 5)
         //                {
-        //                    finalResult = 1;
-        //                     return;
+        //                    checkWin = 1;
+        //                    break;
         //                }
 
         //                //left diagonal
-        //                int tmp=4;
+        //                int tmp = 4;
         //                for (int d = 0; d < 5; d++)
         //                {
-        //                    if (arrBoard[piece.X, piece.Y] == arrBoard[d, tmp])
+        //                    if (arrBoard[_x, _y] == arrBoard[d, tmp])
         //                    {
         //                        tmp--;
         //                        count++;
@@ -487,57 +493,65 @@ namespace Assets.Script
 
         //                if (count == 5)
         //                {
-        //                    finalResult= 1;
+        //                    checkWin = 1;
         //                }
-        //                else finalResult= - 66;
+        //                else checkWin = -Inf;
         //                break;
 
         //            }
         //        case DirectionPoint.Central:
         //            {
-        //                int count = ColumnAndRow(piece);
+        //                int count = ColumnAndRow(_x,_y);
         //                if (count == 5)
         //                {
-        //                    finalResult= 1;
+        //                    checkWin = 1;
         //                }
-        //                else finalResult= - 77;
+        //                else checkWin = -Inf;
         //                break;
         //            }
         //        case DirectionPoint.MiddleColumn:
         //            {
-        //                int count = ColumnAndRow(piece);
+        //                int count = ColumnAndRow(_x, _y);
         //                if (count == 5)
         //                {
-        //                    finalResult= 1;
+        //                    checkWin = 1;
         //                }
-        //                else finalResult= - 88;
+        //                else checkWin = -Inf;
         //                break;
         //            }
         //        case DirectionPoint.MiddleRow:
         //            {
-        //                int count = ColumnAndRow(piece);
+        //                int count = ColumnAndRow(_x, _y);
         //                if (count == 5)
         //                {
-        //                    finalResult= 1;
+        //                    checkWin = 1;
         //                }
-        //                else finalResult= - 2525;
+        //                else checkWin = -Inf;
         //                break;
         //            }
         //    }
-        //    if (availableMove == 25)
+
+        //    if (availableMove == 25 && checkWin==-Inf)
         //    {
-        //        finalResult = 0;
-        //        return;
+        //        checkWin = 0;
+        //        return 0;
+        //    }
+        //    if(checkWin==1)
+        //    {
+        //        if (isMaximum)
+        //            return 1;
+        //        else return -1;
         //    }
 
+        //    return Inf;
         //}
-        //private int ColumnAndRow(PieceBoard piece)
+        //private int ColumnAndRow(int _x, int _y)
         //{
         //    //vertical
         //    int count = 0;
         //    for (int y = 0; y < 5; y++)
         //    {
-        //        if (arrBoard[piece.X, piece.Y] == arrBoard[piece.X, y])
+        //        if (arrBoard[_x, _y] == arrBoard[_x, y] && y!=_y)
         //        {
         //            count++;
         //        }
@@ -553,7 +567,7 @@ namespace Assets.Script
         //    //horizontal
         //    for (int x = 0; x < 5; x++)
         //    {
-        //        if (arrBoard[piece.X, piece.Y] == arrBoard[x, piece.Y])
+        //        if (arrBoard[_x, _y] == arrBoard[x, _y] && x != _x)
         //        {
         //            count++;
         //        }
@@ -563,11 +577,17 @@ namespace Assets.Script
         //            break;
         //        }
         //    }
-        //    return count;
+        //    if (count == 5)
+        //        return count;
+        //    return Inf;
         //}
         public void RestartGame()
         {
             SceneManager.LoadScene(0);
+        }
+        public void QuitGame()
+        {
+            Application.Quit();
         }
     }
 }
