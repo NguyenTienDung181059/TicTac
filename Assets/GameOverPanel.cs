@@ -15,10 +15,14 @@ namespace Assets.Script {
             gameObject.SetActive(false);
         }
         
-        protected void ShowPanel(string winner)
+        private void ShowPanel(string winner)
         {
             text.text = winner;
             gameObject.SetActive(true);
+        }
+        private void ShowRestart()
+        {
+            gameObject.SetActive(false);
         }
     }
 }

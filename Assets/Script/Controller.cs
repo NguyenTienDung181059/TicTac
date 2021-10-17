@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 namespace Assets.Script
 {
@@ -10,11 +11,13 @@ namespace Assets.Script
     {
         public bool playerTurn;
 
-        private const int Inf = 999;
+        private const int Inf = 252525;
 
         private char playerChar = 'X';
 
         private char botChar = 'O';
+
+        public int maxDepth;
 
         private char emptyChar = ' ';
         [SerializeField]
@@ -23,8 +26,8 @@ namespace Assets.Script
         public static Controller controller;
 
         public event Action<string> onGameOver;
-        [SerializeField]
-        private bool gameOver;
+        public event Action onGameRestart;
+        public bool gameOver;
         [SerializeField]
         private int finalResult = -Inf;
         [SerializeField]
@@ -34,19 +37,25 @@ namespace Assets.Script
 
         public GameObject y_Obj;
 
-        public char[,] arrBoard = new char[3, 3];
+        public char[,] arrBoard = new char[5, 5];
 
-        public PieceBoard[,] arrPiece = new PieceBoard[3, 3];
+        public PieceBoard[,] arrPiece = new PieceBoard[5, 5];
 
+        private static int aiPoint;
+        private static int humanPoint;
+        [SerializeField]
+        private Text aiText;
+        [SerializeField]
+        private Text humanText; 
         public enum DirectionPoint { TopLeft, TopRight, BotLeft, BotRight, MiddleRow, MiddleColumn, Central, None }
         private void Start()
         {
             playerTurn = true;
             int count = 0;
-
-            for (int i = 0; i < 3; i++)
+            gameOver = true;
+            for (int i = 0; i < 5; i++)
             {
-                for (int j = 0; j < 3; j++)
+                for (int j = 0; j < 5; j++)
                 {
                     arrBoard[i, j] = emptyChar;
                     arrPiece[i, j] = transform.GetChild(count).GetComponent<PieceBoard>();
@@ -59,21 +68,6 @@ namespace Assets.Script
         {
             controller = this;
         }
-
-        [SerializeField]
-        char[] checkArr = new char[9];
-        private void TEST()
-        {
-            int count = 0;
-            for (int i = 0; i < 3; i++)
-            {
-                for (int u = 0; u < 3; u++)
-                {
-                    checkArr[count] = arrBoard[i, u];
-                    count++;
-                }
-            }
-        }
         private void Update()
         {
             if (playerTurn && !gameOver)
@@ -83,7 +77,7 @@ namespace Assets.Script
                     HandleRayscat();
                 }
             }
-            TEST();
+          //  TEST();
         }
         private void HandleRayscat()
         {
@@ -95,7 +89,7 @@ namespace Assets.Script
 
                 //CheckWin(piece);
 
-                //Check 3x3
+                //Check 5x5
                 var point = CheckCurrentPoint(piece);
                 //  CheckWinV2(point, piece);
 
@@ -105,6 +99,7 @@ namespace Assets.Script
 
                 if (!gameOver)
                     AIMovement();
+                    //BotMove();
 
             }
         }
@@ -142,8 +137,6 @@ namespace Assets.Script
 
         private void BotMove()
         {
-            if (!gameOver)
-            {
                 int _x;
                 int _y;
                 ChooseMove(out _x, out _y);
@@ -153,35 +146,41 @@ namespace Assets.Script
                 SpawmCaroChar(selectPiece);
                 // CheckWin(selectPiece);
 
-                //Check 3x3
+                //Check 5x5
                 var point = CheckCurrentPoint(selectPiece);
                 //CheckWinV2(point, selectPiece);
                 LastResult(CheckWin());
                 playerTurn = true;
-            }
         }
         private void AIMovement()
         {
             int _x = Inf;
             int _y = Inf;
 
-            int bestScore = -Inf;
-            for (int x = 0; x < 3; x++)
+            if (availableMove <= 1)
             {
-                for (int y = 0; y < 3; y++)
+                ChooseMove(out _x, out _y);
+            }
+            else
+            {
+                int bestScore = -Inf;
+                for (int x = 0; x < 5; x++)
                 {
-                    if (arrBoard[x, y] == emptyChar)
+                    for (int y = 0; y < 5; y++)
                     {
-                        arrBoard[x, y] = botChar;
-                        availableMove++;
-                        int score = Minimax(arrBoard, 0, false, x, y);
-                        arrBoard[x, y] = emptyChar;
-                        availableMove--;
-                        if (score > bestScore)
+                        if (arrBoard[x, y] == emptyChar)
                         {
-                            bestScore = score;
-                            _x = x;
-                            _y = y;
+                            arrBoard[x, y] = botChar;
+                            availableMove++;
+                            int score = Minimax(arrBoard, 0, false, x, y);
+                            arrBoard[x, y] = emptyChar;
+                            availableMove--;
+                            if (score > bestScore)
+                            {
+                                bestScore = score;
+                                _x = x;
+                                _y = y;
+                            }
                         }
                     }
                 }
@@ -198,6 +197,13 @@ namespace Assets.Script
         {
             //  PieceBoard piece= new PieceBoard(horizon,vertical);
             // CheckWinV2(CheckCurrentPoint(piece), piece);
+            if (depth == maxDepth)
+            {
+                if (isMaximum)
+                   return 1;
+                else return -1;
+            }
+
             int tmp = CheckWin();
             if (tmp == 0)
             {
@@ -211,18 +217,22 @@ namespace Assets.Script
             {
                 return 10 - depth;
             }
+          //  Debug.Log("depth " + depth);
+
             if (isMaximum)
             {
                 int bestScore = -Inf;
-                for (int x = 0; x < 3; x++)
+                for (int x = 0; x < 5; x++)
                 {
-                    for (int y = 0; y < 3; y++)
+                    for (int y = 0; y < 5; y++)
                     {
                         if (checkBoard[x, y] == emptyChar)
                         {
                             checkBoard[x, y] = botChar;
                             availableMove++;
-                            int curScore = Minimax(checkBoard, depth++, false, x, y);
+                            depth++;
+                            int curScore = Minimax(checkBoard, depth, false, x, y);
+                            depth--;
                             checkBoard[x, y] = emptyChar;
                             availableMove--;
                             bestScore = Math.Max(bestScore, curScore);
@@ -234,15 +244,17 @@ namespace Assets.Script
             else
             {
                 int bestScore = Inf;
-                for (int x = 0; x < 3; x++)
+                for (int x = 0; x < 5; x++)
                 {
-                    for (int y = 0; y < 3; y++)
+                    for (int y = 0; y < 5; y++)
                     {
                         if (checkBoard[x, y] == emptyChar)
                         {
                             checkBoard[x, y] = playerChar;
                             availableMove++;
-                            int curScore = Minimax(checkBoard, depth++, true, x, y);
+                            depth++;
+                            int curScore = Minimax(checkBoard, depth, true, x, y);
+                            depth--;
                             checkBoard[x, y] = emptyChar;
                             availableMove--;
                             bestScore = Math.Min(bestScore, curScore);
@@ -256,15 +268,24 @@ namespace Assets.Script
         private void LastResult(int check)
         {
 
-            if (check == 1 || check == -1)
+            if (check == 1)
             {
                 gameOver = true;
-                onGameOver?.Invoke("Someone Won!");
+                humanPoint++;
+                humanText.text = "YOU: " + humanPoint.ToString();
+                onGameOver?.Invoke("Human Won!");
             }
             else if (check == 0)
             {
                 gameOver = true;
                 onGameOver?.Invoke("Tie!");
+            }
+            else if (check == -1)
+            {
+                gameOver = true;
+                aiPoint++;
+                aiText.text = "AI: " + aiPoint.ToString();
+                onGameOver?.Invoke("AI Won!");
             }
         }
 
@@ -274,14 +295,14 @@ namespace Assets.Script
             _y = 0;
             while (arrPiece[_x, _y].hasChar)
             {
-                _x = UnityEngine.Random.Range(0, 3);
-                _y = UnityEngine.Random.Range(0, 3);
+                _x = UnityEngine.Random.Range(0, 5);
+                _y = UnityEngine.Random.Range(0, 5);
             }
             arrPiece[_x, _y].hasChar = true;
 
-            //for (int x = 0; x < 3; x++)
+            //for (int x = 0; x < 5; x++)
             //{
-            //    for (int y = 0; y < 3; y++)
+            //    for (int y = 0; y < 5; y++)
             //        if (!arrPiece[x, y].hasChar)
             //        {
             //            arrPiece[x, y].hasChar = true;
@@ -294,9 +315,11 @@ namespace Assets.Script
 
         public int CheckWin()
         {
-            for (int y = 0; y < 3; y++)
+            // && arrBoard[y, 0]== arrBoard[y, 5] && arrBoard[y, 0]== arrBoard[y, 4]
+            for (int y = 0; y < 5; y++)
             {
-                if (arrBoard[y, 0] == arrBoard[y, 1] && arrBoard[y, 0] == arrBoard[y, 2])
+                if (arrBoard[y, 0] == arrBoard[y, 1] && arrBoard[y, 0] == arrBoard[y, 2]
+                   && arrBoard[y, 0] == arrBoard[y, 3] && arrBoard[y, 0] == arrBoard[y, 4])
                 {
                     if (arrBoard[y, 0] == playerChar)
                     {
@@ -309,9 +332,11 @@ namespace Assets.Script
                 }
             }
             //Ngang
-            for (int x = 0; x < 3; x++)
+            // && arrBoard[0, x] == arrBoard[5, x] && arrBoard[0, x] == arrBoard[4, x]
+            for (int x = 0; x < 5; x++)
             {
-                if (arrBoard[0, x] == arrBoard[1, x] && arrBoard[0, x] == arrBoard[2, x])
+                if (arrBoard[0, x] == arrBoard[1, x] && arrBoard[0, x] == arrBoard[2, x]
+                  && arrBoard[0, x] == arrBoard[3, x] && arrBoard[0, x] == arrBoard[4, x])
                 {
                     if (arrBoard[0, x] == playerChar)
                     {
@@ -323,9 +348,10 @@ namespace Assets.Script
                     }
                 }
             }
-
+            // && arrBoard[0, 0]== arrBoard[5, 5] && arrBoard[0, 0]== arrBoard[4, 4]
             //Cheo
-            if (arrBoard[0, 0] == arrBoard[1, 1] && arrBoard[0, 0] == arrBoard[2, 2])
+            if (arrBoard[0, 0] == arrBoard[1, 1] && arrBoard[0, 0] == arrBoard[2, 2]
+               && arrBoard[0, 0] == arrBoard[3, 3] && arrBoard[0, 0] == arrBoard[4, 4])
             {
                 if (arrBoard[1, 1] == playerChar)
                 {
@@ -338,20 +364,22 @@ namespace Assets.Script
                 }
             }
 
-            if (arrBoard[0, 2] == arrBoard[1, 1] && arrBoard[0, 2] == arrBoard[2, 0])
+            //arrBoard[0, 2] == arrBoard[1, 1] && arrBoard[0, 2] == arrBoard[2, 0]
+            if (arrBoard[0, 4] == arrBoard[1, 3] && arrBoard[0, 4] == arrBoard[2, 2]
+                && arrBoard[0, 4] == arrBoard[3, 1] && arrBoard[0, 4] == arrBoard[4, 0])
             {
-                if (arrBoard[1, 1] == playerChar)
+                if (arrBoard[2, 2] == playerChar)
                 {
 
                     return 1;
                 }
-                else if (arrBoard[1, 1] == botChar)
+                else if (arrBoard[2, 2] == botChar)
                 {
                     return -1;
                 }
             }
             //Hoa
-            if (availableMove >= 9)
+            if (availableMove == 25)
             {
                 return 0;
             }
@@ -403,13 +431,13 @@ namespace Assets.Script
         //            {
         //                int count;
         //                count = ColumnAndRow(piece);
-        //                if (count == 3)
+        //                if (count == 5)
         //                {
         //                    finalResult = 1;
         //                    return;
         //                }
         //                //right diagonal
-        //                for (int d = 0; d < 3; d++)
+        //                for (int d = 0; d < 5; d++)
         //                {
         //                    if (arrBoard[piece.X, piece.Y] == arrBoard[d, d])
         //                    {
@@ -422,11 +450,11 @@ namespace Assets.Script
         //                    }
         //                }
 
-        //                if (count == 3)
+        //                if (count == 5)
         //                {
         //                    finalResult= 1;
         //                }
-        //                else finalResult= - 33;
+        //                else finalResult= - 55;
 
         //                break;
         //            }
@@ -435,7 +463,7 @@ namespace Assets.Script
         //            {
         //                int count;
         //                count = ColumnAndRow(piece);
-        //                if (count == 3)
+        //                if (count == 5)
         //                {
         //                    finalResult = 1;
         //                     return;
@@ -443,7 +471,7 @@ namespace Assets.Script
 
         //                //left diagonal
         //                int tmp=4;
-        //                for (int d = 0; d < 3; d++)
+        //                for (int d = 0; d < 5; d++)
         //                {
         //                    if (arrBoard[piece.X, piece.Y] == arrBoard[d, tmp])
         //                    {
@@ -457,7 +485,7 @@ namespace Assets.Script
         //                    }
         //                }
 
-        //                if (count == 3)
+        //                if (count == 5)
         //                {
         //                    finalResult= 1;
         //                }
@@ -468,7 +496,7 @@ namespace Assets.Script
         //        case DirectionPoint.Central:
         //            {
         //                int count = ColumnAndRow(piece);
-        //                if (count == 3)
+        //                if (count == 5)
         //                {
         //                    finalResult= 1;
         //                }
@@ -478,7 +506,7 @@ namespace Assets.Script
         //        case DirectionPoint.MiddleColumn:
         //            {
         //                int count = ColumnAndRow(piece);
-        //                if (count == 3)
+        //                if (count == 5)
         //                {
         //                    finalResult= 1;
         //                }
@@ -488,15 +516,15 @@ namespace Assets.Script
         //        case DirectionPoint.MiddleRow:
         //            {
         //                int count = ColumnAndRow(piece);
-        //                if (count == 3)
+        //                if (count == 5)
         //                {
         //                    finalResult= 1;
         //                }
-        //                else finalResult= - 99;
+        //                else finalResult= - 2525;
         //                break;
         //            }
         //    }
-        //    if (availableMove == 23)
+        //    if (availableMove == 25)
         //    {
         //        finalResult = 0;
         //        return;
@@ -507,7 +535,7 @@ namespace Assets.Script
         //{
         //    //vertical
         //    int count = 0;
-        //    for (int y = 0; y < 3; y++)
+        //    for (int y = 0; y < 5; y++)
         //    {
         //        if (arrBoard[piece.X, piece.Y] == arrBoard[piece.X, y])
         //        {
@@ -519,11 +547,11 @@ namespace Assets.Script
         //            break;
         //        }
         //    }
-        //    if (count == 3)
+        //    if (count == 5)
         //        return count;
 
         //    //horizontal
-        //    for (int x = 0; x < 3; x++)
+        //    for (int x = 0; x < 5; x++)
         //    {
         //        if (arrBoard[piece.X, piece.Y] == arrBoard[x, piece.Y])
         //        {
