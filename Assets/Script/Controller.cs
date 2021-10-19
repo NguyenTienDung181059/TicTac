@@ -98,7 +98,7 @@ namespace Assets.Script
                 //  CheckWinV2(point, piece);
 
 
-                LastResult(CheckWin());
+                LastResult(CheckWin(true));
                 playerTurn = false;
 
                 if (!gameOver)
@@ -153,7 +153,7 @@ namespace Assets.Script
             //Check 5x5
             //   var point = CheckCurrentPoint(selectPiece);
             //CheckWinV2(point, selectPiece);
-            LastResult(CheckWin());
+            LastResult(CheckWin(true));
             playerTurn = true;
         }
         private void AIMovement()
@@ -194,7 +194,7 @@ namespace Assets.Script
             SetUpMove(_x, _y);
             SpawmCaroChar(selectPiece);
 
-            LastResult(CheckWin());
+            LastResult(CheckWin(true));
             playerTurn = true;
         }
         private int Minimax(char[,] checkBoard, int depth, bool isMaximum)
@@ -208,7 +208,7 @@ namespace Assets.Script
                 else return -1;
             }
 
-            int tmp = CheckWin();
+            int tmp = CheckWin(false);
             if (tmp == 0)
             {
                 return tmp;
@@ -319,7 +319,42 @@ namespace Assets.Script
             //}
         }
 
-        public int CheckWin()
+        private void ChangeWinColor(Direction type, int index,Color winnerColor)
+        {
+            if(type==Direction.horizontal)
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    arrPiece[index, i].GetComponent<SpriteRenderer>().color = winnerColor;
+                }
+            }
+            else if(type == Direction.vertical)
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    arrPiece[i, index].GetComponent<SpriteRenderer>().color = winnerColor;
+                }
+            }
+            else if(type == Direction.diagonal)
+            {
+                if(index==44)
+                {
+                    for (int i = 0; i < 5; i++)
+                    {
+                        arrPiece[i, i].GetComponent<SpriteRenderer>().color = winnerColor;
+                    }
+                }
+                else if(index==40)
+                {
+                    for (int i = 0; i < 5; i++)
+                    {
+                        arrPiece[i, 4-i].GetComponent<SpriteRenderer>().color = winnerColor;
+                    }
+                }
+            }
+        }
+        enum Direction { horizontal, vertical, diagonal}
+        public int CheckWin(bool changeColor)
         {
             // && arrBoard[y, 0]== arrBoard[y, 5] && arrBoard[y, 0]== arrBoard[y, 4]
             for (int y = 0; y < 5; y++)
@@ -327,29 +362,48 @@ namespace Assets.Script
                 if (arrBoard[y, 0] == arrBoard[y, 1] && arrBoard[y, 0] == arrBoard[y, 2]
                    && arrBoard[y, 0] == arrBoard[y, 3] && arrBoard[y, 0] == arrBoard[y, 4])
                 {
+
                     if (arrBoard[y, 0] == playerChar)
                     {
+                        if (changeColor)
+                        {
+                            ChangeWinColor(Direction.horizontal, y,Color.cyan);
+                        }
+
                         return 1;
                     }
                     else if (arrBoard[y, 0] == botChar)
                     {
+                        if (changeColor)
+                        {
+                            ChangeWinColor(Direction.horizontal, y, Color.red);
+                        }
+
                         return -1;
                     }
                 }
             }
-            //Ngang
             // && arrBoard[0, x] == arrBoard[5, x] && arrBoard[0, x] == arrBoard[4, x]
             for (int x = 0; x < 5; x++)
             {
                 if (arrBoard[0, x] == arrBoard[1, x] && arrBoard[0, x] == arrBoard[2, x]
                   && arrBoard[0, x] == arrBoard[3, x] && arrBoard[0, x] == arrBoard[4, x])
                 {
+
                     if (arrBoard[0, x] == playerChar)
                     {
+                        if (changeColor)
+                        {
+                            ChangeWinColor(Direction.vertical, x, Color.cyan);
+                        }
                         return 1;
                     }
                     else if (arrBoard[0, x] == botChar)
                     {
+                        if (changeColor)
+                        {
+                            ChangeWinColor(Direction.vertical, x, Color.red);
+                        }
                         return -1;
                     }
                 }
@@ -359,13 +413,21 @@ namespace Assets.Script
             if (arrBoard[0, 0] == arrBoard[1, 1] && arrBoard[0, 0] == arrBoard[2, 2]
                && arrBoard[0, 0] == arrBoard[3, 3] && arrBoard[0, 0] == arrBoard[4, 4])
             {
+
                 if (arrBoard[1, 1] == playerChar)
                 {
-
+                    if (changeColor)
+                    {
+                        ChangeWinColor(Direction.vertical, 44, Color.cyan);
+                    }
                     return 1;
                 }
                 else if (arrBoard[1, 1] == botChar)
                 {
+                    if (changeColor)
+                    {
+                        ChangeWinColor(Direction.vertical, 44, Color.red);
+                    }
                     return -1;
                 }
             }
@@ -374,13 +436,21 @@ namespace Assets.Script
             if (arrBoard[0, 4] == arrBoard[1, 3] && arrBoard[0, 4] == arrBoard[2, 2]
                 && arrBoard[0, 4] == arrBoard[3, 1] && arrBoard[0, 4] == arrBoard[4, 0])
             {
+
                 if (arrBoard[2, 2] == playerChar)
                 {
-
+                    if (changeColor)
+                    {
+                        ChangeWinColor(Direction.vertical, 40, Color.cyan);
+                    }
                     return 1;
                 }
                 else if (arrBoard[2, 2] == botChar)
                 {
+                    if (changeColor)
+                    {
+                        ChangeWinColor(Direction.vertical, 40, Color.red);
+                    }
                     return -1;
                 }
             }
