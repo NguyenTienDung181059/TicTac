@@ -136,7 +136,7 @@ GameObject:
   - component: {fileID: 54295901}
   - component: {fileID: 54295900}
   - component: {fileID: 54295899}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: 3.3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -465,7 +465,7 @@ GameObject:
   - component: {fileID: 199438219}
   - component: {fileID: 199438218}
   - component: {fileID: 199438217}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: 4.4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -840,7 +840,7 @@ GameObject:
   - component: {fileID: 315997683}
   - component: {fileID: 315997682}
   - component: {fileID: 315997681}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: 2.4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1067,7 +1067,7 @@ GameObject:
   - component: {fileID: 340809596}
   - component: {fileID: 340809595}
   - component: {fileID: 340809594}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: 3.1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1215,7 +1215,7 @@ GameObject:
   - component: {fileID: 352489108}
   - component: {fileID: 352489107}
   - component: {fileID: 352489106}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: 1.1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1402,7 +1402,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.5882353}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.8509804}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -1779,7 +1779,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b075f4048b8fae44ea91bf8eb9999110, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  selectedDepth: 5
+  selectedDepth: 7
 --- !u!114 &476371842
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1875,7 +1875,7 @@ GameObject:
   - component: {fileID: 488898698}
   - component: {fileID: 488898697}
   - component: {fileID: 488898696}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: 4.1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2023,7 +2023,7 @@ GameObject:
   - component: {fileID: 499490703}
   - component: {fileID: 499490702}
   - component: {fileID: 499490701}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: 1.2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2171,7 +2171,7 @@ GameObject:
   - component: {fileID: 526074682}
   - component: {fileID: 526074681}
   - component: {fileID: 526074680}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: 1.3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2319,7 +2319,7 @@ GameObject:
   - component: {fileID: 573379510}
   - component: {fileID: 573379509}
   - component: {fileID: 573379508}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: 0.4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2467,7 +2467,7 @@ GameObject:
   - component: {fileID: 678087163}
   - component: {fileID: 678087162}
   - component: {fileID: 678087161}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: 2.2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2784,7 +2784,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 232.28394, y: -261.10547}
+  m_AnchoredPosition: {x: 232.28418, y: -261.10547}
   m_SizeDelta: {x: 464.568, y: 522.21094}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &821185103
@@ -2879,7 +2879,7 @@ GameObject:
   - component: {fileID: 897156266}
   - component: {fileID: 897156265}
   - component: {fileID: 897156264}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: 4.2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3093,7 +3093,7 @@ GameObject:
   - component: {fileID: 994034043}
   - component: {fileID: 994034042}
   - component: {fileID: 994034041}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: 1.4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3271,7 +3271,7 @@ GameObject:
   - component: {fileID: 1097684579}
   - component: {fileID: 1097684578}
   - component: {fileID: 1097684577}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: 2.0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3498,7 +3498,7 @@ GameObject:
   - component: {fileID: 1104905568}
   - component: {fileID: 1104905567}
   - component: {fileID: 1104905566}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: 3.0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4093,16 +4093,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b622322fc70e4554c8e9acfeb2b3b693, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerTurn: 0
+  humanColor: {r: 0.14901961, g: 0.22352941, b: 0.5019608, a: 1}
+  AIcolor: {r: 0.9433962, g: 0.29814878, b: 0.29814878, a: 1}
   maxDepth: 0
-  lastPiece: {fileID: 0}
   gameOver: 0
-  finalResult: -999
   availableMove: 0
   x_Obj: {fileID: 3735411568791194034, guid: a1dd4fde571ff0946bc3b01438b23724, type: 3}
   y_Obj: {fileID: 1852996641406354620, guid: 91d16132e6b5ad94b9443134bda9b783, type: 3}
   aiText: {fileID: 176790539}
   humanText: {fileID: 821185103}
+  layerMask:
+    serializedVersion: 2
+    m_Bits: 1024
 --- !u!4 &1313519852
 Transform:
   m_ObjectHideFlags: 0
@@ -4111,7 +4113,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1313519850}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.89, y: -0.944, z: 0}
+  m_LocalPosition: {x: -1, y: -1.03, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 2034051583}
@@ -4155,7 +4157,7 @@ GameObject:
   - component: {fileID: 1351794491}
   - component: {fileID: 1351794490}
   - component: {fileID: 1351794489}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: 4.3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4303,7 +4305,7 @@ GameObject:
   - component: {fileID: 1368814861}
   - component: {fileID: 1368814860}
   - component: {fileID: 1368814859}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: 2.1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4451,7 +4453,7 @@ GameObject:
   - component: {fileID: 1414174933}
   - component: {fileID: 1414174932}
   - component: {fileID: 1414174931}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: 0.3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4599,7 +4601,7 @@ GameObject:
   - component: {fileID: 1427471327}
   - component: {fileID: 1427471326}
   - component: {fileID: 1427471325}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: 3.4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4747,7 +4749,7 @@ GameObject:
   - component: {fileID: 1435104257}
   - component: {fileID: 1435104256}
   - component: {fileID: 1435104255}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: 2.3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4895,7 +4897,7 @@ GameObject:
   - component: {fileID: 1452911933}
   - component: {fileID: 1452911932}
   - component: {fileID: 1452911931}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: 3.2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5176,7 +5178,7 @@ GameObject:
   - component: {fileID: 1510790866}
   - component: {fileID: 1510790865}
   - component: {fileID: 1510790864}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: 1.0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5832,7 +5834,7 @@ GameObject:
   - component: {fileID: 1650546455}
   - component: {fileID: 1650546454}
   - component: {fileID: 1650546453}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: 0.1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5980,7 +5982,7 @@ GameObject:
   - component: {fileID: 1664385638}
   - component: {fileID: 1664385637}
   - component: {fileID: 1664385636}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: 4.0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6403,16 +6405,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b622322fc70e4554c8e9acfeb2b3b693, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerTurn: 0
+  humanColor: {r: 0, g: 0, b: 0, a: 0}
+  AIcolor: {r: 0, g: 0, b: 0, a: 0}
   maxDepth: 0
-  lastPiece: {fileID: 0}
   gameOver: 0
-  finalResult: -999
   availableMove: 0
   x_Obj: {fileID: 3735411568791194034, guid: a1dd4fde571ff0946bc3b01438b23724, type: 3}
   y_Obj: {fileID: 1852996641406354620, guid: 91d16132e6b5ad94b9443134bda9b783, type: 3}
   aiText: {fileID: 0}
   humanText: {fileID: 0}
+  layerMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!1 &1815048494
 GameObject:
   m_ObjectHideFlags: 0
@@ -6574,7 +6578,7 @@ GameObject:
   - component: {fileID: 1860190846}
   - component: {fileID: 1860190845}
   - component: {fileID: 1860190844}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: 0.2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6986,7 +6990,7 @@ GameObject:
   - component: {fileID: 2034051586}
   - component: {fileID: 2034051585}
   - component: {fileID: 2034051584}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: 0.0
   m_TagString: Untagged
   m_Icon: {fileID: 0}

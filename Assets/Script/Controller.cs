@@ -9,7 +9,7 @@ namespace Assets.Script
 {
     class Controller : MonoBehaviour
     {
-        public bool playerTurn;
+        private bool playerTurn;
 
         private const int Inf = 252525;
 
@@ -20,16 +20,15 @@ namespace Assets.Script
         public int maxDepth;
 
         private char emptyChar = ' ';
-        [SerializeField]
-        private PieceBoard lastPiece;
 
         public static Controller controller;
 
         public event Action<string> onGameOver;
+
         public event Action onGameRestart;
+        [HideInInspector]
         public bool gameOver;
-        [SerializeField]
-        private int finalResult = -Inf;
+
         [SerializeField]
         private int availableMove = 0;
 
@@ -42,9 +41,12 @@ namespace Assets.Script
         public PieceBoard[,] arrPiece = new PieceBoard[5, 5];
 
         private int aiPoint;
+
         private int humanPoint;
+
         [SerializeField]
         private Text aiText;
+
         [SerializeField]
         private Text humanText;
         public enum DirectionPoint { TopLeft, TopRight, BotLeft, BotRight, MiddleRow, MiddleColumn, Central, None }
@@ -67,7 +69,8 @@ namespace Assets.Script
                 }
             }
         }
-
+        [SerializeField]
+        private LayerMask layerMask;
         private void Awake()
         {
             controller = this;
@@ -101,11 +104,17 @@ namespace Assets.Script
                 LastResult(CheckWin(true));
                 playerTurn = false;
 
-                if (!gameOver)
-                    AIMovement();
+                StartCoroutine(IWaitSecond());
                 //BotMove();
 
             }
+        }
+
+        IEnumerator IWaitSecond()
+        {
+            yield return new WaitForSeconds(1);
+            if (!gameOver)
+                AIMovement();
         }
         private void SpawmCaroChar(PieceBoard piece)
         {
@@ -114,7 +123,7 @@ namespace Assets.Script
         private PieceBoard CheckRayscat()
         {
             RaycastHit2D raycastHit2D;
-            raycastHit2D = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.one);
+            raycastHit2D = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
 
             if (raycastHit2D.collider != null)
             {
@@ -161,34 +170,34 @@ namespace Assets.Script
             int _x = Inf;
             int _y = Inf;
 
-            if (availableMove <= 1)
+            //if (availableMove <= 1)
+            //{
+            //    ChooseMove(out _x, out _y);
+            //}
+            //else
+            //{
+            int bestScore = -Inf;
+            for (int x = 0; x < 5; x++)
             {
-                ChooseMove(out _x, out _y);
-            }
-            else
-            {
-                int bestScore = -Inf;
-                for (int x = 0; x < 5; x++)
+                for (int y = 0; y < 5; y++)
                 {
-                    for (int y = 0; y < 5; y++)
+                    if (arrBoard[x, y] == emptyChar)
                     {
-                        if (arrBoard[x, y] == emptyChar)
+                        arrBoard[x, y] = botChar;
+                        availableMove++;
+                        int score = Minimax(arrBoard, 0, false,-Inf,Inf);
+                        arrBoard[x, y] = emptyChar;
+                        availableMove--;
+                        if (score > bestScore)
                         {
-                            arrBoard[x, y] = botChar;
-                            availableMove++;
-                            int score = Minimax(arrBoard, 0, false);
-                            arrBoard[x, y] = emptyChar;
-                            availableMove--;
-                            if (score > bestScore)
-                            {
-                                bestScore = score;
-                                _x = x;
-                                _y = y;
-                            }
+                            bestScore = score;
+                            _x = x;
+                            _y = y;
                         }
                     }
                 }
             }
+            //}
             arrBoard[_x, _y] = botChar;
             PieceBoard selectPiece = arrPiece[_x, _y];
             SetUpMove(_x, _y);
@@ -197,15 +206,15 @@ namespace Assets.Script
             LastResult(CheckWin(true));
             playerTurn = true;
         }
-        private int Minimax(char[,] checkBoard, int depth, bool isMaximum)
+        private int Minimax(char[,] checkBoard, int depth, bool isMaximum, int alpha, int beta)
         {
             //  PieceBoard piece= new PieceBoard(horizon,vertical);
             // CheckWinV2(CheckCurrentPoint(piece), piece);
+
+            //5x5
             if (depth == maxDepth)
             {
-                if (isMaximum)
-                    return 1;
-                else return -1;
+                return 0;
             }
 
             int tmp = CheckWin(false);
@@ -215,11 +224,11 @@ namespace Assets.Script
             }
             else if (tmp == 1)
             {
-                return -10;
+                return -10+depth;
             }
             else if (tmp == -1)
             {
-                return 10 - depth;
+                return 10-depth;
             }
             //  Debug.Log("depth " + depth);
 
@@ -234,12 +243,13 @@ namespace Assets.Script
                         {
                             checkBoard[x, y] = botChar;
                             availableMove++;
-                            depth++;
-                            int curScore = Minimax(checkBoard, depth, false);
-                            depth--;
+                            int curScore = Minimax(checkBoard, depth+1, false,alpha,beta);
                             checkBoard[x, y] = emptyChar;
                             availableMove--;
                             bestScore = Math.Max(bestScore, curScore);
+                            alpha = Mathf.Max(alpha, curScore);
+                            if (beta <= alpha)
+                                break;
                         }
                     }
                 }
@@ -256,12 +266,13 @@ namespace Assets.Script
                         {
                             checkBoard[x, y] = playerChar;
                             availableMove++;
-                            depth++;
-                            int curScore = Minimax(checkBoard, depth, true);
-                            depth--;
+                            int curScore = Minimax(checkBoard, depth+1, true,alpha,beta);
                             checkBoard[x, y] = emptyChar;
                             availableMove--;
                             bestScore = Math.Min(bestScore, curScore);
+                            beta = Mathf.Min(beta, curScore);
+                            if (beta <= alpha)
+                                break;
                         }
                     }
                 }
@@ -301,8 +312,8 @@ namespace Assets.Script
             _y = 0;
             while (arrPiece[_x, _y].hasChar)
             {
-                _x = UnityEngine.Random.Range(0, 5);
-                _y = UnityEngine.Random.Range(0, 5);
+                _x = UnityEngine.Random.Range(0, 2);
+                _y = UnityEngine.Random.Range(0, 2);
             }
             arrPiece[_x, _y].hasChar = true;
 
@@ -319,41 +330,41 @@ namespace Assets.Script
             //}
         }
 
-        private void ChangeWinColor(Direction type, int index,Color winnerColor)
+        private void ChangeWinColor(Direction type, int index, Color winnerColor)
         {
-            if(type==Direction.horizontal)
+            if (type == Direction.horizontal)
             {
                 for (int i = 0; i < 5; i++)
                 {
                     arrPiece[index, i].GetComponent<SpriteRenderer>().color = winnerColor;
                 }
             }
-            else if(type == Direction.vertical)
+            else if (type == Direction.vertical)
             {
                 for (int i = 0; i < 5; i++)
                 {
                     arrPiece[i, index].GetComponent<SpriteRenderer>().color = winnerColor;
                 }
             }
-            else if(type == Direction.diagonal)
+            else if (type == Direction.diagonal)
             {
-                if(index==44)
+                if (index == 44)
                 {
                     for (int i = 0; i < 5; i++)
                     {
                         arrPiece[i, i].GetComponent<SpriteRenderer>().color = winnerColor;
                     }
                 }
-                else if(index==40)
+                else if (index == 40)
                 {
                     for (int i = 0; i < 5; i++)
                     {
-                        arrPiece[i, 4-i].GetComponent<SpriteRenderer>().color = winnerColor;
+                        arrPiece[i, 4 - i].GetComponent<SpriteRenderer>().color = winnerColor;
                     }
                 }
             }
         }
-        enum Direction { horizontal, vertical, diagonal}
+        enum Direction { horizontal, vertical, diagonal }
         public int CheckWin(bool changeColor)
         {
             // && arrBoard[y, 0]== arrBoard[y, 5] && arrBoard[y, 0]== arrBoard[y, 4]
@@ -367,7 +378,7 @@ namespace Assets.Script
                     {
                         if (changeColor)
                         {
-                            ChangeWinColor(Direction.horizontal, y,Color.cyan);
+                            ChangeWinColor(Direction.horizontal, y, Color.blue);
                         }
 
                         return 1;
@@ -394,7 +405,7 @@ namespace Assets.Script
                     {
                         if (changeColor)
                         {
-                            ChangeWinColor(Direction.vertical, x, Color.cyan);
+                            ChangeWinColor(Direction.vertical, x, Color.blue);
                         }
                         return 1;
                     }
@@ -418,7 +429,7 @@ namespace Assets.Script
                 {
                     if (changeColor)
                     {
-                        ChangeWinColor(Direction.vertical, 44, Color.cyan);
+                        ChangeWinColor(Direction.diagonal, 44, Color.blue);
                     }
                     return 1;
                 }
@@ -426,14 +437,14 @@ namespace Assets.Script
                 {
                     if (changeColor)
                     {
-                        ChangeWinColor(Direction.vertical, 44, Color.red);
+                        ChangeWinColor(Direction.diagonal, 44, Color.red);
                     }
                     return -1;
                 }
             }
 
             //arrBoard[0, 2] == arrBoard[1, 1] && arrBoard[0, 2] == arrBoard[2, 0]
-            if (arrBoard[0, 4] == arrBoard[1, 3] && arrBoard[0, 4] == arrBoard[2, 2]
+            if (arrBoard[0, 4] == arrBoard[1, 3] && arrBoard[2, 2] == arrBoard[0, 4]
                 && arrBoard[0, 4] == arrBoard[3, 1] && arrBoard[0, 4] == arrBoard[4, 0])
             {
 
@@ -441,7 +452,7 @@ namespace Assets.Script
                 {
                     if (changeColor)
                     {
-                        ChangeWinColor(Direction.vertical, 40, Color.cyan);
+                        ChangeWinColor(Direction.diagonal, 40, Color.blue);
                     }
                     return 1;
                 }
@@ -449,7 +460,7 @@ namespace Assets.Script
                 {
                     if (changeColor)
                     {
-                        ChangeWinColor(Direction.vertical, 40, Color.red);
+                        ChangeWinColor(Direction.diagonal, 40, Color.red);
                     }
                     return -1;
                 }
