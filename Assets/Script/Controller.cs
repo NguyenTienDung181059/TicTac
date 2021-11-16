@@ -107,7 +107,7 @@ namespace Assets.Script
 
         IEnumerator IWaitSecond()
         {
-            yield return new WaitForSeconds(1);
+            yield return new WaitForSeconds(2);
             if (!gameOver)
                 AIMovement();
         }
@@ -135,6 +135,7 @@ namespace Assets.Script
             if (playerTurn)
             {
                 arrBoard[_x, _y] = playerChar;
+               // Debug.Log("Save  " + arrBoard[_x, _y] + "  " + _x +" " + _y);
             }
             else
             {
@@ -145,20 +146,19 @@ namespace Assets.Script
 
         private void BotMove()
         {
-            int _x;
-            int _y;
-            ChooseMove(out _x, out _y);
+            if (!gameOver)
+            {
+                int _x;
+                int _y;
+                ChooseMove(out _x, out _y);
 
-            PieceBoard selectPiece = arrPiece[_x, _y];
-            SetUpMove(selectPiece.X, selectPiece.Y);
-            SpawmCaroChar(selectPiece);
-            // CheckWin(selectPiece);
+                PieceBoard selectPiece = arrPiece[_x, _y];
+                SetUpMove(selectPiece.X, selectPiece.Y);
+                SpawmCaroChar(selectPiece);
 
-            //Check 5x5
-            //   var point = CheckCurrentPoint(selectPiece);
-            //CheckWinV2(point, selectPiece);
-            LastResult(CheckWin(true));
-            playerTurn = true;
+                LastResult(CheckWin(true));
+                playerTurn = true;
+            }
         }
         private void AIMovement()
         {
@@ -175,8 +175,7 @@ namespace Assets.Script
                         arrBoard[x, y] = botChar;
                         availableMove++;
                        // int score = MinimaxBeta(arrBoard, 0, false,-Inf,Inf,x,y);
-                        int score = Minimax(arrBoard, 0, false,x,y);
-                        Debug.Log(score);
+                        int score = Minimax(arrBoard, 1, false,x,y);
                         arrBoard[x, y] = emptyChar;
                         availableMove--;
                         if (score > bestScore)
@@ -188,7 +187,7 @@ namespace Assets.Script
                     }
                 }
             }
-            //}
+
             arrBoard[_x, _y] = botChar;
             PieceBoard selectPiece = arrPiece[_x, _y];
             SetUpMove(_x, _y);
@@ -273,12 +272,12 @@ namespace Assets.Script
         private int Minimax(char[,] checkBoard, int depth, bool isMaximum, int horizontal, int vertical)
         {
             //5x5
-            if (depth == maxDepth)
+            if (depth > maxDepth)
             {
-                return -1;
+                return 0;
             }
 
-            //   int tmp = CheckWin(false);
+
             int tmp = CheckWinV2(false,horizontal,vertical);
             if (tmp == 0)
             {
@@ -292,7 +291,6 @@ namespace Assets.Script
             {
                 return 10 - depth;
             }
-            //  Debug.Log("depth " + depth);
 
             if (isMaximum)
             {
@@ -373,17 +371,6 @@ namespace Assets.Script
             }
             arrPiece[_x, _y].hasChar = true;
 
-            //for (int x = 0; x < 5; x++)
-            //{
-            //    for (int y = 0; y < 5; y++)
-            //        if (!arrPiece[x, y].hasChar)
-            //        {
-            //            arrPiece[x, y].hasChar = true;
-            //            _x = x;
-            //            _y = y;
-            //            return;
-            //        }
-            //}
         }
 
         private void ChangeWinColor(Direction type, int index, Color winnerColor)
@@ -554,6 +541,10 @@ namespace Assets.Script
                     }
                     else
                     {
+                        if (arrBoard[horizontal, i + 3] != playerChar && arrBoard[horizontal, i - 1] != playerChar && arrBoard[horizontal, i] == botChar)
+                            return -1;
+                        if (arrBoard[horizontal, i + 3] != botChar && arrBoard[horizontal, i - 1] != botChar && arrBoard[horizontal, i] == playerChar)
+                            return 1;
                         if (arrBoard[horizontal, i + 3] == playerChar && arrBoard[horizontal, i] == botChar && arrBoard[horizontal, i - 1] == botChar)
                             return -1;
                         else if (arrBoard[horizontal, i -1] == playerChar && arrBoard[horizontal, i] == botChar && arrBoard[horizontal, i+3] == botChar)
@@ -585,6 +576,10 @@ namespace Assets.Script
                     }
                     else
                     {
+                        if (arrBoard[i + 3, vertical] != playerChar && arrBoard[i - 1, vertical] != playerChar && arrBoard[i, vertical] == botChar)
+                            return -1;
+                        if (arrBoard[i + 3, vertical] != botChar && arrBoard[i - 1, vertical] != botChar && arrBoard[i, vertical] == playerChar)
+                            return 1;
                         if (arrBoard[i + 3, vertical] == playerChar && arrBoard[i, vertical] == botChar && arrBoard[i-1, vertical] == botChar)
                             return -1;
                         else if (arrBoard[i-1, vertical] == playerChar && arrBoard[i, vertical] == botChar && arrBoard[i+3, vertical] == botChar)
@@ -599,303 +594,144 @@ namespace Assets.Script
             DiagonalSide checkSide = GetPostionDiagonal(horizontal, vertical);
             int maxNumber = GetNumber(checkSide, horizontal, vertical);
             int start_x = horizontal - vertical;
-            int start_y = vertical - vertical;
+            int start_y = vertical - horizontal;
             //Cheo phai
-            for (int i = 0; i <= maxNumber-3; i++) 
+            if (checkSide == DiagonalSide.Up || checkSide == DiagonalSide.Mid && maxNumber>=3)
             {
-                if (arrBoard[start_x, i] == arrBoard[start_x+1, i+1] && arrBoard[start_x+2, i+2] == arrBoard[start_x, i])
-                    if (i == 2)
+                for (int i = 0; i <= maxNumber - 3; i++)
+                {
+                    if (arrBoard[start_x + i, i] == arrBoard[start_x + i + 1, i + 1] && arrBoard[start_x + i + 2, i + 2] == arrBoard[start_x + i, i] && arrBoard[start_x + i, i]!=emptyChar)
                     {
-                        if (arrBoard[i - 1, vertical] != playerChar && arrBoard[i, vertical] == botChar)
-                            return -1;
-                        else if (arrBoard[i - 1, vertical] != botChar && arrBoard[i, vertical] == playerChar)
-                            return 1;
+                        if (start_x + 3 == 4 + 1)
+                        {
+                            if (arrBoard[start_x + i, i] == botChar)
+                                return -1;
+                            else if (arrBoard[start_x + i, i] == playerChar)
+                                return 1;
+                        }
+                        else if (start_x + 3 <= 4)
+                        {
+                            if (i == 0 && arrBoard[start_x + i + 3, i + 3] != playerChar && arrBoard[start_x + i, i] == botChar)
+                                return -1;
+                            else if (i == maxNumber - 3 && arrBoard[start_x + i - 1, i - 1] != playerChar && arrBoard[start_x + i, i] == botChar)
+                                return -1;
+                            else if (i > 0 && i != maxNumber - 3 && arrBoard[start_x + i - 1, i - 1] == playerChar && arrBoard[start_x + i, i] == botChar && arrBoard[start_x + i + 3, i + 3] == botChar)
+                                return -1;
+                            else if (i > 0 && i != maxNumber - 3 && arrBoard[start_x + i + 3, i + 3] == playerChar && arrBoard[start_x + i, i] == botChar && arrBoard[start_x + i - 1, i - 1] == botChar)
+                                return -1;
+
+                            if (i == 0 && arrBoard[start_x + i + 3, i + 3] != botChar && arrBoard[start_x + i, i] == playerChar)
+                                return 1;
+                            else if (i == maxNumber - 3 && arrBoard[start_x + i - 1, i - 1] != botChar && arrBoard[start_x + i, i] == playerChar)
+                                return 1;
+                            else if (i > 0 && i != maxNumber - 3 && arrBoard[start_x + i - 1, i - 1] == botChar && arrBoard[start_x + i, i] == playerChar && arrBoard[start_x + i + 3, i + 3] == playerChar)
+                                return 1;
+                            else if (i > 0 && i != maxNumber - 3 && arrBoard[start_x + i + 3, i + 3] == botChar && arrBoard[start_x + i, i] == playerChar && arrBoard[start_x + i - 1, i - 1] == playerChar)
+                                return 1;
+
+                        }
                     }
-                    if (start_x + 3 <=4)
+                }
+            }
+            if (checkSide == DiagonalSide.Down && maxNumber>=3)
+            {
+                for (int i = 0; i <= maxNumber - 3; i++)
+                {
+                    if (arrBoard[i, start_y+i] == arrBoard[i + 1, start_y+i+1] && arrBoard[i + 2, start_y + i + 2] == arrBoard[i,start_y+ i] && arrBoard[i,start_y+ i]!=emptyChar)
                     {
-                        if (arrBoard[start_x, i] != playerChar && arrBoard[start_x, i+3] == botChar )
-                            return -1;
-                        else if (arrBoard[i + 3, vertical] != botChar && arrBoard[i, vertical] == playerChar)
-                            return 1;
+                        if (start_y + 3 == 4 + 1)
+                        {
+                            if (arrBoard[i, start_y+i] == botChar)
+                                return -1;
+                            else if (arrBoard[i, start_y + i] == playerChar)
+                                return 1;
+                        }
+                        else if (start_y + 3 <= 4)
+                        {
+                            if (i == 0 && arrBoard[i + 3, start_y + i + 3] != playerChar && arrBoard[i, start_y+i] == botChar)
+                                return -1;
+                            else if (i!= 0 && i == maxNumber - 3 && arrBoard[i - 1, start_y + i - 1] != playerChar && arrBoard[i, start_y+ i] == botChar)
+                                return -1;
+                            else if (i > 0 && i != maxNumber - 3 && arrBoard[ i - 1, start_y+ i - 1] == playerChar && arrBoard[i, start_y+ i] == botChar && arrBoard[ i + 3, start_y+ i + 3] == botChar)
+                                return -1;
+                            else if (i > 0 && i != maxNumber - 3 && arrBoard[i + 3, start_y+ i + 3] == playerChar && arrBoard[i, start_y+ i] == botChar && arrBoard[i - 1, start_y+ i - 1] == botChar)
+                                return -1;
+
+                            if (i == 0 && arrBoard[i + 3, start_y+ i + 3] != botChar && arrBoard[i, start_y+ i] == playerChar)
+                                return 1;
+                            else if (i != 0 && i == maxNumber - 3 && arrBoard[i - 1, start_y+ i - 1] != botChar && arrBoard[i, start_y+ i] == playerChar)
+                                return 1;
+                            else if (i > 0 && i != maxNumber - 3 && arrBoard[i - 1, start_y+ i - 1] == botChar && arrBoard[i, start_y+ i] == playerChar && arrBoard[i + 3, start_y+ i + 3] == playerChar)
+                                return 1;
+                            else if (i > 0 && i != maxNumber - 3 && arrBoard[i + 3, start_y+ i + 3] == botChar && arrBoard[i, start_y+ i] == playerChar && arrBoard[i - 1, start_y+ i - 1] == playerChar)
+                                return 1;
+
+                        }
                     }
-                    else
-                    {
-                        if (arrBoard[i + 3, vertical] == playerChar && arrBoard[i, vertical] == botChar && arrBoard[i - 1, vertical] == botChar)
-                            return -1;
-                        else if (arrBoard[i - 1, vertical] == playerChar && arrBoard[i, vertical] == botChar && arrBoard[i + 3, vertical] == botChar)
-                            return -1;
-                        if (arrBoard[i + 3, vertical] == botChar && arrBoard[i, vertical] == playerChar && arrBoard[i - 1, vertical] == playerChar)
-                            return 1;
-                        else if (arrBoard[i - 1, vertical] == botChar && arrBoard[i, vertical] == playerChar && arrBoard[i + 3, vertical] == playerChar)
-                            return 1;
-                    }
+                }
             }
 
-            //    if (vertical <= 2 && arrBoard[horizontal, vertical] == arrBoard[horizontal, vertical+1] && arrBoard[horizontal, vertical] == arrBoard[horizontal, vertical+2]
-            //       )
-            //    {
+            //Cheo trai
 
-            //        if (arrBoard[horizontal, vertical] == playerChar)
-            //        {
-            //            if (changeColor)
-            //            {
-            //                ChangeWinColor(Direction.horizontal, vertical, Color.blue);
-            //            }
+            int maxCount = 1;
+            int startX=horizontal;
+            int startY=vertical;
+            while(startX > 0 && startY < 4)
+            {
+                startX--;
+                startY++;
+            }
+            int _x=startX;
+            int _y=startY;
+            while (startX < 4 && startY > 0)
+            {
+                startX++;
+                startY--;
+                maxCount++;
+            }
 
-            //            return 1;
-            //        }
-            //        else if (arrBoard[horizontal, vertical] == botChar)
-            //        {
-            //            if (changeColor)
-            //            {
-            //                ChangeWinColor(Direction.horizontal, vertical, Color.red);
-            //            }
+            for(int i=0; i<=maxCount-3; i++)
+            {
+                if (arrBoard[_x+i, _y-i] == arrBoard[_x + i + 1, _y - i - 1] && arrBoard[_x + i, _y - i] == arrBoard[_x + i + 2, _y - i - 2] && arrBoard[_x + i, _y - i]!=emptyChar)
+                {
+                    if (_x+i + 3 == 4 + 1)
+                    {
+                        if (arrBoard[_x + i, _y - i] == botChar)
+                            return -1;
+                        else if (arrBoard[_x + i, _y - i] == playerChar)
+                            return 1;
+                    }
+                    else if (_x+i + 3 <= 4)
+                    {
+                        if (i == 0 && maxCount==3 && arrBoard[_x + i, _y - i] == botChar)
+                            return -1;
+                        if (i == 0 && maxCount>3 && arrBoard[_x + i + 3, _y - i - 3] != playerChar && arrBoard[_x + i, _y - i] == botChar)
+                            return -1;
+                        else if (i != 0 && i == maxCount - 3 && arrBoard[_x + i - 1, _y - i + 1] != playerChar && arrBoard[_x + i, _y - i] == botChar)
+                            return -1;
+                        else if (i > 0 && i != maxCount - 3 && arrBoard[_x + i - 1, _y - i + 1] == playerChar && arrBoard[_x + i, _y - i] == botChar && arrBoard[_x + i + 3, _y - i - 3] == botChar)
+                            return -1;
+                        else if (i > 0 && i != maxCount - 3 && arrBoard[_x + i + 3, _y - i - 3] == playerChar && arrBoard[_x + i, _y - i] == botChar && arrBoard[_x + i - 1, _y - i + 1] == botChar)
+                            return -1;
+                        else if (i > 0 && i != maxCount - 3 && arrBoard[_x + i - 1, _y - i + 1] != playerChar && arrBoard[_x + i + 3, _y - i - 3] != playerChar && arrBoard[_x + i, _y - i] == botChar)
+                            return -1;
 
-            //            return -1;
-            //        }
+                        if (i == 0 && maxCount == 3 && arrBoard[_x + i, _y - i] == playerChar)
+                            return 1;
+                        if (i == 0 && maxCount > 3 && arrBoard[_x + i + 3, _y - i - 3] != botChar && arrBoard[_x + i, _y - i] == playerChar)
+                            return 1;
+                        else if (i != 0 && i == maxCount - 3 && arrBoard[_x + i - 1, _y - i + 1] != botChar && arrBoard[_x + i, _y - i] == playerChar)
+                            return 1; 
+                        else if (i > 0 && i != maxCount - 3 && arrBoard[_x + i - 1, _y - i + 1] == botChar && arrBoard[_x + i, _y - i] == playerChar && arrBoard[_x + i + 3, _y - i - 3] == playerChar)
+                            return 1;
+                        else if (i > 0 && i != maxCount - 3 && arrBoard[_x + i + 3, _y - i - 3] == botChar && arrBoard[_x + i, _y - i] == playerChar && arrBoard[_x + i - 1, _y - i + 1] == playerChar)
+                            return 1; 
+                        else if (i > 0 && i != maxCount - 3 && arrBoard[_x + i - 1, _y - i + 1] != botChar && arrBoard[_x + i + 3, _y - i - 3] != botChar && arrBoard[_x + i, _y - i] == playerChar)
+                            return 1;
+                    }
+                }
+            }
 
-            //     }
-
-            //    if (vertical >= 1 && vertical <= 3 && arrBoard[horizontal, vertical] == arrBoard[horizontal, vertical - 1] && arrBoard[horizontal, vertical] == arrBoard[horizontal, vertical + 1]
-            //       )
-            //     {
-            //        if (arrBoard[horizontal, vertical] == playerChar)
-            //        {
-            //            if (changeColor)
-            //            {
-            //            ChangeWinColor(Direction.horizontal, vertical, Color.blue);
-            //            }
-            //            return 1;
-            //        }
-            //        else if (arrBoard[horizontal, vertical] == botChar)
-            //        {
-            //            if (changeColor)
-            //            {
-            //            ChangeWinColor(Direction.horizontal, vertical, Color.red);
-            //            }
-            //            return -1;
-            //        }
-
-            //     }
-
-            //    if (vertical >= 2 && arrBoard[horizontal, vertical] == arrBoard[horizontal, vertical -1] && arrBoard[horizontal, vertical] == arrBoard[horizontal, vertical -2]
-            //       )
-            //     {
-            //        if (arrBoard[horizontal, vertical] == playerChar)
-            //        {
-            //            if (changeColor)
-            //            {
-            //            ChangeWinColor(Direction.horizontal, vertical, Color.blue);
-            //            }
-            //            return 1;
-            //        }
-            //        else if (arrBoard[horizontal, vertical] == botChar)
-            //        {
-            //            if (changeColor)
-            //            {
-            //            ChangeWinColor(Direction.horizontal, vertical, Color.red);
-            //            }
-            //            return -1;
-            //        }               
-            //     }
-            ////Doc
-            //if (horizontal <= 2 && arrBoard[horizontal, vertical] == arrBoard[horizontal+1, vertical] && arrBoard[horizontal, vertical] == arrBoard[horizontal+2, vertical]
-            //       )
-            //     {
-            //        if (arrBoard[horizontal, vertical] == playerChar)
-            //        {
-            //            if (changeColor)
-            //            {
-            //            ChangeWinColor(Direction.vertical, horizontal, Color.blue);
-            //            }
-            //            return 1;
-            //        }
-            //        else if (arrBoard[horizontal, vertical] == botChar)
-            //        {
-            //            if (changeColor)
-            //            {
-            //            ChangeWinColor(Direction.vertical, horizontal, Color.red);
-            //            }
-            //            return -1;
-            //        }               
-            //     }
-
-            //if (horizontal <= 3 && horizontal >= 1 && arrBoard[horizontal, vertical] == arrBoard[horizontal + 1, vertical] && arrBoard[horizontal, vertical] == arrBoard[horizontal - 1, vertical]
-            //       )
-            //{
-
-            //    if (arrBoard[horizontal, vertical] == playerChar)
-            //    {
-            //        if (changeColor)
-            //        {
-            //            ChangeWinColor(Direction.vertical, 44, Color.blue);
-            //        }
-            //        return 1;
-            //    }
-            //    else if (arrBoard[horizontal, vertical] == botChar)
-            //    {
-            //        if (changeColor)
-            //        {
-            //            ChangeWinColor(Direction.vertical, 44, Color.red);
-            //        }
-            //        return -1;
-            //    }
-            //}
-
-            //if (horizontal >= 2 && arrBoard[horizontal, vertical] == arrBoard[horizontal - 2, vertical] && arrBoard[horizontal, vertical] == arrBoard[horizontal - 1, vertical]
-            //       )
-            //{
-
-            //    if (arrBoard[horizontal, vertical] == playerChar)
-            //    {
-            //        if (changeColor)
-            //        {
-            //            ChangeWinColor(Direction.vertical, 40, Color.blue);
-            //        }
-            //        return 1;
-            //    }
-            //    else if (arrBoard[horizontal, vertical] == botChar)
-            //    {
-            //        if (changeColor)
-            //        {
-            //            ChangeWinColor(Direction.vertical, 40, Color.red);
-            //        }
-            //        return -1;
-            //    }
-            //}
-
-            ////Cheo phai
-            //if (horizontal <= 2 && vertical <= 2  && arrBoard[horizontal, vertical] == arrBoard[horizontal + 1, vertical+1] && arrBoard[horizontal, vertical] == arrBoard[horizontal + 2, vertical+2]
-            //      )
-            //{
-
-            //    if (arrBoard[horizontal, vertical] == playerChar)
-            //    {
-            //        if (changeColor)
-            //        {
-            //            ChangeWinColor(Direction.diagonal, 40, Color.blue);
-            //        }
-            //        return 1;
-            //    }
-            //    else if (arrBoard[horizontal, vertical] == botChar)
-            //    {
-            //        if (changeColor)
-            //        {
-            //            ChangeWinColor(Direction.diagonal, 40, Color.red);
-            //        }
-            //        return -1;
-            //    }
-            //}
-
-            //if (horizontal <= 3 && vertical <= 3 && horizontal >= 1 && vertical >= 1 && arrBoard[horizontal, vertical] == arrBoard[horizontal + 1, vertical+1] && arrBoard[horizontal, vertical] == arrBoard[horizontal - 1, vertical - 1]
-            //     )
-            //{
-
-            //    if (arrBoard[horizontal, vertical] == playerChar)
-            //    {
-            //        if (changeColor)
-            //        {
-            //            ChangeWinColor(Direction.diagonal, 40, Color.blue);
-            //        }
-            //        return 1;
-            //    }
-            //    else if (arrBoard[horizontal, vertical] == botChar)
-            //    {
-            //        if (changeColor)
-            //        {
-            //            ChangeWinColor(Direction.diagonal, 40, Color.red);
-            //        }
-            //        return -1;
-            //    }
-            //} 
-
-            //if (horizontal >= 2 && vertical >= 2 && arrBoard[horizontal, vertical] == arrBoard[horizontal - 1, vertical - 1] && arrBoard[horizontal, vertical] == arrBoard[horizontal - 2, vertical - 2]
-            //      )
-            //{
-
-            //    if (arrBoard[horizontal, vertical] == playerChar)
-            //    {
-            //        if (changeColor)
-            //        {
-            //            ChangeWinColor(Direction.diagonal, 40, Color.blue);
-            //        }
-            //        return 1;
-            //    }
-            //    else if (arrBoard[horizontal, vertical] == botChar)
-            //    {
-            //        if (changeColor)
-            //        {
-            //            ChangeWinColor(Direction.diagonal, 40, Color.red);
-            //        }
-            //        return -1;
-            //    }
-            //}
-            ////Cheo trai
-            //if (horizontal <= 2 && vertical >= 2 && arrBoard[horizontal, vertical] == arrBoard[horizontal +1, vertical - 1] && arrBoard[horizontal, vertical] == arrBoard[horizontal +2, vertical - 2]
-            //     )
-            //{
-
-            //    if (arrBoard[horizontal, vertical] == playerChar)
-            //    {
-            //        if (changeColor)
-            //        {
-            //            ChangeWinColor(Direction.diagonal, 40, Color.blue);
-            //        }
-            //        return 1;
-            //    }
-            //    else if (arrBoard[horizontal, vertical] == botChar)
-            //    {
-            //        if (changeColor)
-            //        {
-            //            ChangeWinColor(Direction.diagonal, 40, Color.red);
-            //        }
-            //        return -1;
-            //    }
-            //}
-
-            //if (horizontal <= 3 && vertical >= 1 && horizontal >= 1 && vertical <= 3 && arrBoard[horizontal, vertical] == arrBoard[horizontal + 1, vertical - 1] && arrBoard[horizontal, vertical] == arrBoard[horizontal -1, vertical +1]
-            //      )
-            //{
-
-            //    if (arrBoard[horizontal, vertical] == playerChar)
-            //    {
-            //        if (changeColor)
-            //        {
-            //            ChangeWinColor(Direction.diagonal, 40, Color.blue);
-            //        }
-            //        return 1;
-            //    }
-            //    else if (arrBoard[horizontal, vertical] == botChar)
-            //    {
-            //        if (changeColor)
-            //        {
-            //            ChangeWinColor(Direction.diagonal, 40, Color.red);
-            //        }
-            //        return -1;
-            //    }
-            //}
-            //if (horizontal >= 2 && vertical <= 2 && arrBoard[horizontal, vertical] == arrBoard[horizontal -1, vertical + 1] && arrBoard[horizontal, vertical] == arrBoard[horizontal - 2, vertical + 2]
-            //     )
-            //{
-
-            //    if (arrBoard[horizontal, vertical] == playerChar)
-            //    {
-            //        if (changeColor)
-            //        {
-            //            ChangeWinColor(Direction.diagonal, 40, Color.blue);
-            //        }
-            //        return 1;
-            //    }
-            //    else if (arrBoard[horizontal, vertical] == botChar)
-            //    {
-            //        if (changeColor)
-            //        {
-            //            ChangeWinColor(Direction.diagonal, 40, Color.red);
-            //        }
-            //        return -1;
-            //    }
-            //}
-            //Hoa
             if (availableMove == 25)
             {
                 return 0;
@@ -905,6 +741,7 @@ namespace Assets.Script
                 return Inf;
             }
         }
+
         enum DiagonalSide { Up, Down, Mid }
         private DiagonalSide GetPostionDiagonal(int horizontal,int vertical)
         {
@@ -927,192 +764,7 @@ namespace Assets.Script
             }
             else return 5;
         }
-        //private DirectionPoint CheckCurrentPoint(int horizontal, int vertical)
-        //{
-        //    if (horizontal < 2 && vertical < 2)
-        //    {
-        //        return DirectionPoint.BotLeft;
-        //    }
-        //    else if (horizontal < 2 && vertical > 2)
-        //    {
-        //        return DirectionPoint.TopLeft;
-        //    }
-        //    else if (horizontal > 2 && vertical < 2)
-        //    {
-        //        return DirectionPoint.BotRight;
-        //    }
-        //    else if (horizontal > 2 && vertical > 2)
-        //    {
-        //        return DirectionPoint.TopRight;
-        //    }
-        //    else if (vertical == 2)
-        //    {
-        //        if (vertical != 2)
-        //            return DirectionPoint.MiddleRow;
-        //        else return DirectionPoint.Central;
-        //    }
-        //    else if (vertical == 2)
-        //    {
-        //        if (vertical != 2)
-        //            return DirectionPoint.MiddleColumn;
-        //        else return DirectionPoint.Central;
-        //    }
-        //    else return DirectionPoint.None;
-        //}
-
-        //private int CheckWinV2(DirectionPoint point, int _x, int _y,bool isMaximum)
-        //{
-        //    int checkWin=-Inf;
-        //    switch (point)
-        //    {
-        //        case DirectionPoint.BotLeft:
-        //        case DirectionPoint.TopRight:
-        //            {
-        //                int count;
-        //                count = ColumnAndRow(_x,_y);
-        //                if (count == 5)
-        //                {
-        //                    checkWin = 1;
-        //                    break;
-        //                }
-        //                //right diagonal
-        //                for (int d = 0; d < 5; d++)
-        //                {
-        //                    if (arrBoard[_x, _y] == arrBoard[d, d])
-        //                    {
-        //                        count++;
-        //                    }
-        //                    else
-        //                    {
-        //                        count = 0;
-        //                        break;
-        //                    }
-        //                }
-
-        //                if (count == 5)
-        //                {
-        //                    checkWin = 1;
-        //                }
-        //                else checkWin = -Inf;
-        //                break;
-        //            }
-        //        case DirectionPoint.TopLeft:
-        //        case DirectionPoint.BotRight:
-        //            {
-        //                int count;
-        //                count = ColumnAndRow(_x,_y);
-        //                if (count == 5)
-        //                {
-        //                    checkWin = 1;
-        //                    break;
-        //                }
-
-        //                //left diagonal
-        //                int tmp = 4;
-        //                for (int d = 0; d < 5; d++)
-        //                {
-        //                    if (arrBoard[_x, _y] == arrBoard[d, tmp])
-        //                    {
-        //                        tmp--;
-        //                        count++;
-        //                    }
-        //                    else
-        //                    {
-        //                        count = 0;
-        //                        break;
-        //                    }
-        //                }
-
-        //                if (count == 5)
-        //                {
-        //                    checkWin = 1;
-        //                }
-        //                else checkWin = -Inf;
-        //                break;
-
-        //            }
-        //        case DirectionPoint.Central:
-        //            {
-        //                int count = ColumnAndRow(_x,_y);
-        //                if (count == 5)
-        //                {
-        //                    checkWin = 1;
-        //                }
-        //                else checkWin = -Inf;
-        //                break;
-        //            }
-        //        case DirectionPoint.MiddleColumn:
-        //            {
-        //                int count = ColumnAndRow(_x, _y);
-        //                if (count == 5)
-        //                {
-        //                    checkWin = 1;
-        //                }
-        //                else checkWin = -Inf;
-        //                break;
-        //            }
-        //        case DirectionPoint.MiddleRow:
-        //            {
-        //                int count = ColumnAndRow(_x, _y);
-        //                if (count == 5)
-        //                {
-        //                    checkWin = 1;
-        //                }
-        //                else checkWin = -Inf;
-        //                break;
-        //            }
-        //    }
-
-        //    if (availableMove == 25 && checkWin==-Inf)
-        //    {
-        //        checkWin = 0;
-        //        return 0;
-        //    }
-        //    if(checkWin==1)
-        //    {
-        //        if (isMaximum)
-        //            return 1;
-        //        else return -1;
-        //    }
-
-        //    return Inf;
-        //}
-        //private int ColumnAndRow(int _x, int _y)
-        //{
-        //    //vertical
-        //    int count = 0;
-        //    for (int y = 0; y < 5; y++)
-        //    {
-        //        if (arrBoard[_x, _y] == arrBoard[_x, y] && y!=_y)
-        //        {
-        //            count++;
-        //        }
-        //        else
-        //        {
-        //            count = 0;
-        //            break;
-        //        }
-        //    }
-        //    if (count == 5)
-        //        return count;
-
-        //    //horizontal
-        //    for (int x = 0; x < 5; x++)
-        //    {
-        //        if (arrBoard[_x, _y] == arrBoard[x, _y] && x != _x)
-        //        {
-        //            count++;
-        //        }
-        //        else
-        //        {
-        //            count = 0;
-        //            break;
-        //        }
-        //    }
-        //    if (count == 5)
-        //        return count;
-        //    return Inf;
-        //}
+       
         public void RestartGame()
         {
             SceneManager.LoadScene(0);

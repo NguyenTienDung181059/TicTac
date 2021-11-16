@@ -4093,8 +4093,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b622322fc70e4554c8e9acfeb2b3b693, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  humanColor: {r: 0.14901961, g: 0.22352941, b: 0.5019608, a: 1}
-  AIcolor: {r: 0.9433962, g: 0.29814878, b: 0.29814878, a: 1}
   maxDepth: 0
   gameOver: 0
   availableMove: 0
@@ -6405,8 +6403,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b622322fc70e4554c8e9acfeb2b3b693, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  humanColor: {r: 0, g: 0, b: 0, a: 0}
-  AIcolor: {r: 0, g: 0, b: 0, a: 0}
   maxDepth: 0
   gameOver: 0
   availableMove: 0
