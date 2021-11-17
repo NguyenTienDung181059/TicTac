@@ -9,7 +9,11 @@ namespace Assets.Script {
         private Button button;
         [SerializeField]
         private int selectedDepth;
+        [SerializeField]
+        private diff difficult;
         Controller controller;
+
+        public enum diff{ Minimax, AlphaBeta}
         // Start is called before the first frame update
         void Start()
         {
@@ -20,6 +24,7 @@ namespace Assets.Script {
         private void SetUpDepth()
         {
             controller.maxDepth = selectedDepth;
+            controller.curDifficult = difficult;
             controller.gameOver = false;
             transform.parent.parent.gameObject.SetActive(false);
         }
